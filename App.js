@@ -1,45 +1,45 @@
 import * as React from 'react';
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import 'react-native-gesture-handler';
+import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-function HomeScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Home!</Text>
-    </View>
-  );
-}
+// Importar los componentes
+import ListComunidades from './screens/ListComunidades';
+import ListProvincias from './screens/ListComunidades';
+import ListIncidencias from './screens/ListComunidades';
+import DetailIncidencia from './screens/ListComunidades';
 
-function SettingsScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Settings!</Text>
-    </View>
-  );
-}
 
-const Tab = createMaterialBottomTabNavigator();
 
 export default function App() {
+
+  const Stack = createStackNavigator();
+
+  function MyStack() {
+    return (
+      <Stack.Navigator>
+        <Stack.Screen name="Comunidades" component={ListComunidades} />
+        <Stack.Screen name="Provincias" component={ListProvincias} />
+        <Stack.Screen name="Incidencias" component={ListIncidencias} />
+        <Stack.Screen name="Detail" component={DetailIncidencia} />
+      </Stack.Navigator>
+    )
+  }
+
   return (
     <NavigationContainer>
-      <Tab.Navigator
-        initialRouteName="Home"
-        activeColor="#f0edf6"
-        inactiveColor="#3e2465"
-        barStyle={{ backgroundColor: '#694fad' }}
-      >
-        <Tab.Screen name="Home" component={HomeScreen}
-          options={{
-            tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="home" size={25} color={color} />
-            ),
-            headerShown: false
-          }} />
-        <Tab.Screen name="Settings" component={SettingsScreen} />
-      </Tab.Navigator>
+      <MyStack />
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
+
