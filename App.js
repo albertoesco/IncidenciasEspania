@@ -6,9 +6,9 @@ import { NavigationContainer } from '@react-navigation/native';
 
 // Importar los componentes
 import ListComunidades from './screens/ListComunidades';
-import ListProvincias from './screens/ListComunidades';
-import ListIncidencias from './screens/ListComunidades';
-import DetailIncidencia from './screens/ListComunidades';
+import ListProvincias from './screens/ListProvincias';
+import ListIncidencias from './screens/ListIncidencias';
+import DetailIncidencia from './screens/DetailIncidencia';
 
 
 

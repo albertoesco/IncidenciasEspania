@@ -1,15 +1,52 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, FlatList } from "react-native";
+import { useEffect, useState } from "react";
+import appFirebase from "../credenciales";
+import { getFirestore, collection, query, where, getDocs, doc } from "firebase/firestore";
+
+const db = getFirestore(appFirebase);
 
 export default function ListProvincias({ route }) {
-    const { comunidadId } = route.params;
+    const { nombreComunidad } = route.params; // Cambiado a nombreComunidad
+    const [provincias, setProvincias] = useState([]);
 
+    useEffect(() => {
+        const getProvincias = async () => {
+            try {
+                // Consultar las provincias de la comunidad por su nombre
+                const comunidadQuery = query(collection(db, "comunidades"), where("nombre", "==", nombreComunidad));
+                const comunidadSnapshot = await getDocs(comunidadQuery);
 
-    // Aquí puedes utilizar el ID de la comunidad para obtener las provincias correspondientes
-    // a través de consultas a tu base de datos
+                if (!comunidadSnapshot.empty) {
+                    // Si se encuentra la comunidad, obtener sus provincias
+                    const comunidadDoc = comunidadSnapshot.docs[0];
+                    const provinciasRef = collection(comunidadDoc.ref, "provincias");
+                    const provinciasSnapshot = await getDocs(provinciasRef);
+                    const provinciasData = provinciasSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setProvincias(provinciasData);
+                } else {
+                    console.log("No se encontró la comunidad:", nombreComunidad);
+                }
+            } catch (error) {
+                console.error("Error fetching provincias: ", error);
+            }
+        };
+
+        getProvincias();
+    }, [nombreComunidad]);
+
     return (
         <View style={styles.container}>
-            <Text>Provincias de la comunidad con ID: {comunidadId}</Text>
+            <FlatList
+                data={provincias}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                    <Text>{item.nombre}</Text>
+                )}
+            />
             <StatusBar style="auto" />
         </View>
     );
