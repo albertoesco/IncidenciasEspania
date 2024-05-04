@@ -9,6 +9,7 @@ import ListComunidades from './screens/ListComunidades';
 import ListProvincias from './screens/ListProvincias';
 import ListIncidencias from './screens/ListIncidencias';
 import DetailIncidencia from './screens/DetailIncidencia';
+import NewIncidencia from './screens/NewIncidencia';
 
 
 
@@ -23,6 +24,7 @@ export default function App() {
         <Stack.Screen name="Provincias" component={ListProvincias} />
         <Stack.Screen name="Incidencias" component={ListIncidencias} />
         <Stack.Screen name="Detail" component={DetailIncidencia} />
+        <Stack.Screen name="New" component={NewIncidencia} />
       </Stack.Navigator>
     )
   }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Button } from "react-native";
 import appFirebase from "../credenciales";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getFirestore, collection, getDocs, onSnapshot } from "firebase/firestore";
 
 const db = getFirestore(appFirebase);
 
@@ -14,12 +14,14 @@ export default function ListIncidencias({ route, navigation }) {
         const getIncidencias = async () => {
             try {
                 const incidenciasRef = collection(db, "comunidades", nombreComunidad, "provincias", nombreProvincia, "incidencias");
-                const incidenciasSnapshot = await getDocs(incidenciasRef);
-                const incidenciasData = incidenciasSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                setIncidencias(incidenciasData);
+                const unsubscribe = onSnapshot(incidenciasRef, (snapshot) => {
+                    const incidenciasData = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    setIncidencias(incidenciasData);
+                });
+                return () => unsubscribe();
             } catch (error) {
                 console.error("Error fetching incidencias: ", error);
             }
@@ -33,6 +35,10 @@ export default function ListIncidencias({ route, navigation }) {
         navigation.navigate("Detail", { incidencia });
     };
 
+    const handleNewIncidencia = () => {
+        navigation.navigate("New", { nombreComunidad, nombreProvincia });
+    };
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Incidencias de {nombreProvincia}</Text>
@@ -43,6 +49,9 @@ export default function ListIncidencias({ route, navigation }) {
                     </TouchableOpacity>
                 ))}
             </ScrollView>
+            <View style={styles.addButtonContainer}>
+                <Button title="Nueva Incidencia" onPress={handleNewIncidencia} />
+            </View>
         </View>
     );
 }
@@ -61,5 +70,10 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         width: "100%",
+    },
+    addButtonContainer: {
+        position: "absolute",
+        bottom: 20,
+        right: 20,
     },
 });
