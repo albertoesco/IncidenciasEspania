@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import appFirebase from "../credenciales";
@@ -9,35 +8,29 @@ const db = getFirestore(appFirebase);
 export default function ListIncidencias({ route, navigation }) {
     const { nombreComunidad, nombreProvincia } = route.params;
     const [incidencias, setIncidencias] = useState([]);
+    const [selectedIncidencia, setSelectedIncidencia] = useState(null);
 
-    
     useEffect(() => {
-        console.log("nombreProvincia:", nombreProvincia);
         const getIncidencias = async () => {
             try {
-                // Consultar las incidencias de la provincia por su nombre
                 const incidenciasRef = collection(db, "comunidades", nombreComunidad, "provincias", nombreProvincia, "incidencias");
                 const incidenciasSnapshot = await getDocs(incidenciasRef);
-                const incidenciasData = [];
-                incidenciasSnapshot.forEach((doc) => {
-                    incidenciasData.push({
-                        id: doc.id,
-                        ...doc.data()
-                    });
-                });
+                const incidenciasData = incidenciasSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
                 setIncidencias(incidenciasData);
-                console.log("Incidencias obtenidas:", incidenciasData); // Log para mostrar las incidencias obtenidas
             } catch (error) {
                 console.error("Error fetching incidencias: ", error);
             }
         };
-    
+
         getIncidencias();
     }, [nombreProvincia, nombreComunidad]);
-    
 
-    const handleIncidenciaPress = (nombreIncidencia) => {
-        // Aquí puedes manejar el evento de presionar una incidencia
+    const handleIncidenciaPress = (incidencia) => {
+        setSelectedIncidencia(incidencia);
+        navigation.navigate("Detail", { incidencia });
     };
 
     return (
@@ -45,12 +38,11 @@ export default function ListIncidencias({ route, navigation }) {
             <Text style={styles.title}>Incidencias de {nombreProvincia}</Text>
             <ScrollView style={styles.scrollView}>
                 {incidencias.map((incidencia, index) => (
-                    <TouchableOpacity key={index} onPress={() => handleIncidenciaPress(incidencia.nombre)}>
+                    <TouchableOpacity key={index} onPress={() => handleIncidenciaPress(incidencia)}>
                         <Text>{incidencia.nombre}</Text>
                     </TouchableOpacity>
                 ))}
             </ScrollView>
-            <StatusBar style="auto" />
         </View>
     );
 }
