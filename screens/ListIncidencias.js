@@ -42,16 +42,16 @@ export default function ListIncidencias({ route, navigation }) {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Incidencias de {nombreProvincia}</Text>
-            <ScrollView style={styles.scrollView}>
+            <ScrollView contentContainerStyle={styles.scrollView}>
                 {incidencias.map((incidencia, index) => (
-                    <TouchableOpacity key={index} onPress={() => handleIncidenciaPress(incidencia)}>
+                    <TouchableOpacity key={index} style={styles.card} onPress={() => handleIncidenciaPress(incidencia)}>
                         <Text>{incidencia.nombre}</Text>
                     </TouchableOpacity>
                 ))}
             </ScrollView>
-            <View style={styles.addButtonContainer}>
-                <Button title="Nueva Incidencia" onPress={handleNewIncidencia} />
-            </View>
+            <TouchableOpacity style={styles.addButton} onPress={handleNewIncidencia}>
+                <Text style={styles.addButtonText}>Nueva Incidencia</Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -60,20 +60,36 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
-        alignItems: "center",
-        justifyContent: "center",
     },
     title: {
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 10,
+        alignSelf: "flex-start", // Alineado a la izquierda
+        marginLeft: 20, // Añadido margen izquierdo
     },
     scrollView: {
-        width: "100%",
+        alignItems: "center", // Alineado al centro
     },
-    addButtonContainer: {
+    card: {
+        width: "90%",
+        backgroundColor: "#e0e0e0",
+        padding: 20,
+        marginVertical: 10,
+        borderRadius: 10,
+    },
+    addButton: {
         position: "absolute",
         bottom: 20,
         right: 20,
+        backgroundColor: "#007bff", // Color de fondo del botón
+        borderRadius: 25, // Borde redondeado
+        paddingVertical: 15, // Espacio vertical interno
+        paddingHorizontal: 25, // Espacio horizontal interno
+    },
+    addButtonText: {
+        color: "#fff", // Color del texto
+        fontSize: 18,
+        fontWeight: "bold",
     },
 });

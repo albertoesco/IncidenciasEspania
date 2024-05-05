@@ -31,15 +31,16 @@ export default function ListComunidades(props) {
 
   return (
     <ScrollView>
-      <View>
+      <View style={styles.container}>
         {lista.map((list, index) => (
           <TouchableOpacity
             key={index}
+            style={styles.card}
             onPress={() =>
               props.navigation.navigate("Provincias", { nombreComunidad: list.nombre })
             }
           >
-            <Text>{list.nombre}</Text>
+            <Text style={styles.cardText}>{list.nombre}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -54,5 +55,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+  },
+  card: {
+    width: "80%",
+    backgroundColor: "#e0e0e0",
+    padding: 20,
+    marginVertical: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+  },
+  cardText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });

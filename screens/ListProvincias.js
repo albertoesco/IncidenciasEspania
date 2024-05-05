@@ -38,8 +38,8 @@ export default function ListProvincias({ route, navigation }) {
                 data={provincias}
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => handleProvinciaPress(item.nombre)}>
-                        <Text>{item.nombre}</Text>
+                    <TouchableOpacity style={styles.card} onPress={() => handleProvinciaPress(item.nombre)}>
+                        <Text style={styles.cardText}>{item.nombre}</Text>
                     </TouchableOpacity>
                 )}
             />
@@ -50,9 +50,24 @@ export default function ListProvincias({ route, navigation }) {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center'
+      flex: 1,
+      backgroundColor: "#fff",
+      alignItems: "center",
+      justifyContent: "center",
     },
-});
+    card: {
+      width: "100%",
+      backgroundColor: "#e0e0e0",
+      padding: 20,
+      marginVertical: 10,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      alignSelf: "center",
+    },
+    cardText: {
+      fontSize: 18,
+      fontWeight: "bold",
+      textAlign: "center",
+    },
+  });
