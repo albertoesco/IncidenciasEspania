@@ -39,6 +39,11 @@ export default function NewIncidencia({ route, navigation, setIncidencias }) {
         }
     };
 
+    // Función para navegar a la pantalla de captura de imagen
+    const openFotoScreen = () => {
+        navigation.navigate('Foto'); // Cambia 'CapturarImagen' al nombre que elijas
+    };
+
     return (
         <View style={styles.container}>
             <Text style={styles.label}>Nombre:</Text>
@@ -60,6 +65,7 @@ export default function NewIncidencia({ route, navigation, setIncidencias }) {
                 value={estado}
                 onChangeText={setEstado}
             />
+            <Button title="Foto" onPress={openFotoScreen} />
             <Button title="Crear Incidencia" onPress={handleNewIncidencia} />
         </View>
     );

@@ -10,6 +10,8 @@ import ListProvincias from './screens/ListProvincias';
 import ListIncidencias from './screens/ListIncidencias';
 import DetailIncidencia from './screens/DetailIncidencia';
 import NewIncidencia from './screens/NewIncidencia';
+import Foto from './screens/Foto';
+
 
 
 
@@ -25,6 +27,7 @@ export default function App() {
         <Stack.Screen name="Incidencias" component={ListIncidencias} />
         <Stack.Screen name="Detail" component={DetailIncidencia} />
         <Stack.Screen name="New" component={NewIncidencia} />
+        <Stack.Screen name="Foto" component={Foto} />
       </Stack.Navigator>
     )
   }
