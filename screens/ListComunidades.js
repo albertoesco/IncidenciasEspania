@@ -69,6 +69,14 @@ export default function ListComunidades(props) {
           </TouchableOpacity>
         ))}
       </View>
+      {/* Botón para abrir la pantalla de Chat */}
+      <TouchableOpacity style={styles.chatButton} onPress={() => props.navigation.navigate("Chat")}>
+        <Text style={styles.chatButtonText}>Chat</Text>
+      </TouchableOpacity>
+      {/* Botón para abrir la pantalla de inicio de sesión */}
+      <TouchableOpacity style={styles.loginButton} onPress={() => props.navigation.navigate("Login")}>
+        <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+      </TouchableOpacity>
       <StatusBar style="auto" />
     </ScrollView>
   );
@@ -101,5 +109,33 @@ const styles = StyleSheet.create({
     width: 30, // Ajustar el ancho de la imagen según sea necesario
     height: 20, // Ajustar la altura de la imagen según sea necesario
     marginRight: 10, // Espacio entre la imagen de la bandera y el texto
+  },
+  chatButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "blue",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  chatButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  loginButton: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    backgroundColor: "green",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  loginButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

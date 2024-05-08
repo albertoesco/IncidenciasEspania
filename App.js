@@ -11,9 +11,8 @@ import ListIncidencias from './screens/ListIncidencias';
 import DetailIncidencia from './screens/DetailIncidencia';
 import NewIncidencia from './screens/NewIncidencia';
 import Foto from './screens/Foto';
-
-
-
+import Chat from './screens/Chat';
+import Login from './screens/Login';
 
 export default function App() {
 
@@ -21,13 +20,18 @@ export default function App() {
 
   function MyStack() {
     return (
-      <Stack.Navigator>
+      <Stack.Navigator
+        gestureEnabled={true} // Habilitar los gestos de navegación
+        gestureDirection="horizontal" // Configurar la dirección del gesto
+      >
         <Stack.Screen name="Comunidades" component={ListComunidades} />
         <Stack.Screen name="Provincias" component={ListProvincias} />
         <Stack.Screen name="Incidencias" component={ListIncidencias} />
         <Stack.Screen name="Detail" component={DetailIncidencia} />
         <Stack.Screen name="New" component={NewIncidencia} />
         <Stack.Screen name="Foto" component={Foto} />
+        <Stack.Screen name="Chat" component={Chat} />
+        <Stack.Screen name="Login" component={Login} />
       </Stack.Navigator>
     )
   }
