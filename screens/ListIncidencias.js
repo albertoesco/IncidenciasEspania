@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Button } from "react-native";
-import appFirebase from "../credenciales";
+import appFirebase from "../firebase/credenciales";
 import { getFirestore, collection, getDocs, onSnapshot } from "firebase/firestore";
 
 const db = getFirestore(appFirebase);

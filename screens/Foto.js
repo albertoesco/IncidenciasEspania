@@ -1,10 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Camera, CameraType } from 'expo-camera';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import firebase from 'firebase/app';
-import 'firebase/storage';
 
-export default function Foto() {
+export default function App() {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const cameraRef = useRef(null); // Crear la referencia
@@ -33,28 +31,16 @@ export default function Foto() {
     if (cameraRef.current) {
       try {
         const { uri } = await cameraRef.current.takePictureAsync(); // Capturar la foto
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        
-        // Construir la ruta de almacenamiento
-        const storageRef = firebase.storage().ref();
-        const incidenciasRef = storageRef.child(`comunidades/Andalucía/provincias/Almería/incidencias`);
-        const fotoRef = incidenciasRef.child(`foto_${new Date().getTime()}.jpg`); // Generar un nombre único para la foto
-  
-        // Subir la foto al almacenamiento
-        await fotoRef.put(blob);
-  
-        console.log('Foto capturada y almacenada correctamente');
+        console.log('Foto capturada:', uri); // Manejar la URI de la foto
       } catch (error) {
-        console.error('Error al tomar y almacenar la foto:', error);
+        console.error('Error al tomar la foto:', error);
       }
     }
   }
-  
 
   return (
     <View style={styles.container}>
-      <Camera style={styles.camera} type={type} ref={cameraRef}>
+      <Camera style={styles.camera} type={type} ref={cameraRef}> {/* Asignar la referencia */}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
             <Text style={styles.text}>Cambiar cámara</Text>
