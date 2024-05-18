@@ -1,8 +1,9 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image } from "react-native";
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const db = getFirestore(appFirebase);
 
@@ -43,6 +44,9 @@ export default function ListProvincias({ route, navigation }) {
                     </TouchableOpacity>
                 )}
             />
+            <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('Chat')}>
+                <Icon name="comments" size={24} color="white" />
+            </TouchableOpacity>
             <StatusBar style="auto" />
         </View>
     );
@@ -50,24 +54,38 @@ export default function ListProvincias({ route, navigation }) {
 
 const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      backgroundColor: "#fff",
-      alignItems: "center",
-      justifyContent: "center",
+        flex: 1,
+        backgroundColor: '#fffc00', // Fondo gris claro
+        alignItems: 'center', // Alinear elementos en el centro horizontalmente
+        justifyContent: 'center', // Alinear elementos en el centro verticalmente
     },
     card: {
-      width: "100%",
-      backgroundColor: "#e0e0e0",
-      padding: 20,
-      marginVertical: 10,
-      borderRadius: 10,
-      alignItems: "center",
-      justifyContent: "center",
-      alignSelf: "center",
+        width: '100%',
+        backgroundColor: '#ffdb00', // Amarillo dorado
+        padding: 20,
+        marginVertical: 10,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        elevation: 5,
+        borderWidth: 2,
+        borderColor: '#ad1519', // Borde rojo
     },
     cardText: {
-      fontSize: 18,
-      fontWeight: "bold",
-      textAlign: "center",
+        fontSize: 18,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        color: '#ad1519', // Rojo oscuro
     },
-  });
+    chatButton: {
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        backgroundColor: '#00008B', // Azul oscuro
+        borderRadius: 10,
+        padding: 10,
+        elevation: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+});

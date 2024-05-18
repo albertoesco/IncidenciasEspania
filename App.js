@@ -23,6 +23,15 @@ export default function App() {
       <Stack.Navigator
         gestureEnabled={true} // Habilitar los gestos de navegación
         gestureDirection="horizontal" // Configurar la dirección del gesto
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#ad1519', // Color de fondo del header
+          },
+          headerTintColor: '#fff', // Color del texto e íconos del header
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
       >
         <Stack.Screen name="Comunidades" component={ListComunidades} />
         <Stack.Screen name="Provincias" component={ListProvincias} />
@@ -51,4 +60,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-

@@ -7,9 +7,9 @@ export default function DetailIncidencia({ route }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{incidencia.nombre}</Text>
-      <Text>Descripción: {incidencia.descripcion}</Text>
-      <Text>Fecha: {incidencia.fecha}</Text>
-      <Text>Estado: {incidencia.estado}</Text>
+      <Text style={styles.text}>Descripción: {incidencia.descripcion}</Text>
+      <Text style={styles.text}>Fecha: {incidencia.fecha}</Text>
+      <Text style={styles.text}>Estado: {incidencia.estado}</Text>
     </View>
   );
 }
@@ -17,13 +17,19 @@ export default function DetailIncidencia({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#fffc00", // Fondo amarillo dorado
     alignItems: "center",
     justifyContent: "center",
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
     marginBottom: 10,
+    color: "#ad1519", // Texto rojo oscuro
+  },
+  text: {
+    fontSize: 18,
+    marginBottom: 5,
+    color: "#ad1519", // Texto rojo oscuro
   },
 });

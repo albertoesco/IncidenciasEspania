@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { auth } from '../firebase/credenciales';
 import { useNavigation } from '@react-navigation/native';
@@ -12,17 +12,11 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [username, setUsername] = useState('');  // Nuevo estado para el nombre de usuario
-
+  const [username, setUsername] = useState('');
   const navigation = useNavigation();
 
-  const handleEmailChange = (text) => {
-    setEmail(text);
-  };
-
-  const handlePasswordChange = (text) => {
-    setPassword(text);
-  };
+  const handleEmailChange = (text) => setEmail(text);
+  const handlePasswordChange = (text) => setPassword(text);
 
   const validateInput = () => {
     if (!email || !password) {
@@ -45,43 +39,35 @@ export default function Login() {
     setModalVisible(true);
   };
 
-  const hideModal = () => {
-    setModalVisible(false);
-  };
+  const hideModal = () => setModalVisible(false);
 
   const handleSignInOrSignUp = async () => {
     if (!validateInput()) return;
     try {
-      // Intentar iniciar sesión
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('Usuario iniciado sesión con éxito:', userCredential.user.email);
-      const user = email.split('@')[0];  // Obtener el nombre de usuario
+      const user = email.split('@')[0];
       setUsername(user);
-      showModal('Inició sesión con éxito');
+      showModal('Logged in successfully');
       setTimeout(() => {
         hideModal();
-        navigation.navigate('Comunidades'); // Navega a la pantalla de la lista de comunidades
-      }, 1000); // Tiempo para mostrar el modal antes de navegar
+        navigation.navigate('Comunidades');
+      }, 1000);
     } catch (signInError) {
       if (signInError.code === 'auth/user-not-found') {
-        // Si el usuario no existe, intentar registrarlo
         try {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          console.log('Usuario registrado con éxito:', userCredential.user.email);
-          const user = email.split('@')[0];  // Obtener el nombre de usuario
+          const user = email.split('@')[0];
           setUsername(user);
-          showModal('Registrado con éxito');
+          showModal('Registered successfully');
           setTimeout(() => {
             hideModal();
-            navigation.navigate('Comunidades'); // Navega a la pantalla de la lista de comunidades
-          }, 1000); // Tiempo para mostrar el modal antes de navegar
+            navigation.navigate('Comunidades');
+          }, 1000);
         } catch (signUpError) {
           setError(signUpError.message);
-          console.log('Error al registrar el usuario:', signUpError.message);
         }
       } else {
         setError(signInError.message);
-        console.log('Error al iniciar sesión:', signInError.message);
       }
     }
   };
@@ -89,35 +75,33 @@ export default function Login() {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      console.log('Usuario cerró sesión con éxito');
-      setUsername('');  // Limpiar el nombre de usuario al cerrar sesión
-      showModal('Cerró sesión con éxito');
+      setUsername('');
+      showModal('Signed out successfully');
       setTimeout(() => {
         hideModal();
-        navigation.navigate('Login'); // Navega a la pantalla de inicio de sesión
-      }, 1000); // Tiempo para mostrar el modal antes de navegar
+        navigation.navigate('Login');
+      }, 1000);
     } catch (error) {
-      setError('Error al cerrar sesión');
-      console.log('Error al cerrar sesión:', error);
+      setError('Error signing out');
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.userContainer}>
-        <Text style={styles.userLabel}>Usuario:</Text>
+        <Text style={styles.userLabel}>Username:</Text>
         <Text style={styles.username}>{username}</Text>
       </View>
-      <Text style={styles.title}>Inicio Sesión / Registro</Text>
+      <Text style={styles.title}>Login / Register</Text>
       <TextInput
         style={styles.input}
-        placeholder="Correo electrónico"
+        placeholder="Email"
         value={email}
         onChangeText={handleEmailChange}
       />
       <TextInput
         style={styles.input}
-        placeholder="Contraseña"
+        placeholder="Password"
         secureTextEntry
         value={password}
         onChangeText={handlePasswordChange}
@@ -126,8 +110,12 @@ export default function Login() {
         <Text style={styles.error}>{error}</Text>
       )}
       <View style={styles.buttonContainer}>
-        <Button title="Iniciar Sesión / Registrarse" onPress={handleSignInOrSignUp} />
-        <Button title="Cerrar Sesión" onPress={handleSignOut} />
+        <TouchableOpacity style={styles.button} onPress={handleSignInOrSignUp}>
+          <Text style={styles.buttonText}>Login / Register</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={handleSignOut}>
+          <Text style={styles.buttonText}>Sign Out</Text>
+        </TouchableOpacity>
       </View>
       <Modal isVisible={isModalVisible}>
         <View style={styles.modalContent}>
@@ -145,6 +133,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: '#f0f0f0',
   },
   userContainer: {
     position: 'absolute',
@@ -156,14 +145,16 @@ const styles = StyleSheet.create({
   userLabel: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginRight: 5,
   },
   username: {
     fontSize: 16,
-    marginLeft: 5,
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
+    fontWeight: 'bold',
+    color: '#333',
   },
   input: {
     width: '100%',
@@ -178,6 +169,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
+  },
+  button: {
+    backgroundColor: '#007bff',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   error: {
     color: 'red',

@@ -1,9 +1,13 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from "react-native";
-import appFirebase from "../firebase/credenciales";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { useEffect, useState } from "react";
-import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import * as React from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import appFirebase from '../firebase/credenciales';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { getStorage, ref, getDownloadURL } from 'firebase/storage';
 
 const db = getFirestore(appFirebase);
 const storage = getStorage(appFirebase);
@@ -11,11 +15,12 @@ const storage = getStorage(appFirebase);
 export default function ListComunidades(props) {
   const [lista, setLista] = useState([]);
   const [imagenes, setImagenes] = useState({});
+  const [userLoggedIn, setUserLoggedIn] = useState(false); // Estado para saber si el usuario está registrado
 
   useEffect(() => {
     const getLista = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "comunidades"));
+        const querySnapshot = await getDocs(collection(db, 'comunidades'));
         const docs = [];
         querySnapshot.forEach((doc) => {
           const { nombre, idcomunidad } = doc.data();
@@ -49,93 +54,99 @@ export default function ListComunidades(props) {
     obtenerImagenes();
   }, [lista]);
 
+  // Función para manejar el inicio de sesión o cierre de sesión
+  const handleLogin = () => {
+    if (userLoggedIn) {
+      // Cerrar sesión
+      // Aquí deberías agregar la lógica para cerrar sesión
+    } else {
+      // Iniciar sesión
+      props.navigation.navigate('Login');
+    }
+  };
+
   return (
-    <ScrollView>
-      <View style={styles.container}>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollView}>
         {lista.map((list, index) => (
           <TouchableOpacity
             key={index}
             style={styles.card}
             onPress={() =>
-              props.navigation.navigate("Provincias", { nombreComunidad: list.nombre })
+              props.navigation.navigate('Provincias', { nombreComunidad: list.nombre })
             }
           >
-            {/* Aquí se muestra la imagen de la comunidad */}
             {imagenes[list.idcomunidad] && (
               <Image source={{ uri: imagenes[list.idcomunidad] }} style={styles.flagImage} />
             )}
-            {/* Aquí se muestra el nombre de la comunidad */}
             <Text style={styles.cardText}>{list.nombre}</Text>
           </TouchableOpacity>
         ))}
-      </View>
-      {/* Botón para abrir la pantalla de Chat */}
-      <TouchableOpacity style={styles.chatButton} onPress={() => props.navigation.navigate("Chat")}>
-        <Text style={styles.chatButtonText}>Chat</Text>
+      </ScrollView>
+      <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <Icon name={userLoggedIn ? 'sign-out' : 'sign-in'} size={24} color="white" />
       </TouchableOpacity>
-      {/* Botón para abrir la pantalla de inicio de sesión */}
-      <TouchableOpacity style={styles.loginButton} onPress={() => props.navigation.navigate("Login")}>
-        <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+      <TouchableOpacity style={styles.chatButton} onPress={() => props.navigation.navigate('Chat')}>
+        <Icon name="comments" size={24} color="white" />
       </TouchableOpacity>
       <StatusBar style="auto" />
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: '#fffc00', // Fondo gris claro
+  },
+  scrollView: {
+    alignItems: 'center', // Centra verticalmente las tarjetas
   },
   card: {
-    width: "80%",
-    backgroundColor: "#e0e0e0",
+    width: '90%',
+    backgroundColor: '#ffdb00', // Amarillo dorado
     padding: 20,
     marginVertical: 10,
-    borderRadius: 10,
-    flexDirection: "row", // Para alinear elementos horizontalmente
-    alignItems: "center", // Para centrar verticalmente los elementos
-    justifyContent: "flex-start", // Para alinear los elementos a la izquierda
-    alignSelf: "center",
+    borderRadius: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    elevation: 5,
+    borderWidth: 2,
+    borderColor: '#ad1519', // Borde rojo
   },
   cardText: {
     fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#ad1519', // Rojo oscuro
   },
   flagImage: {
-    width: 30, // Ajustar el ancho de la imagen según sea necesario
-    height: 20, // Ajustar la altura de la imagen según sea necesario
-    marginRight: 10, // Espacio entre la imagen de la bandera y el texto
+    width: 40, // Ajustar el ancho de la imagen según sea necesario
+    height: 30, // Ajustar la altura de la imagen según sea necesario
+    marginRight: 20, // Espacio entre la imagen de la bandera y el texto
+    borderRadius: 5,
   },
   chatButton: {
-    position: "absolute",
+    position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: "blue",
+    backgroundColor: '#00008B', // Azul oscuro
     borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  chatButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    padding: 10,
+    elevation: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   loginButton: {
-    position: "absolute",
-    bottom: 20,
-    left: 20,
-    backgroundColor: "green",
+    position: 'absolute',
+    top: 20,
+    right: 20, // Ajusta la posición a la derecha
+    backgroundColor: '#ad1519', // Rojo oscuro
     borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  loginButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    padding: 10,
+    elevation: 5,
+    alignItems: 'center',
+    marginTop: 10, // Ajusta el margen superior para separar del contenido
   },
 });
