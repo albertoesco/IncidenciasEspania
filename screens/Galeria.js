@@ -1,12 +1,14 @@
+
 import React, { useState } from 'react';
 import { Button, Image, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
-export default function Galeria({ navigation }) {
+export default function Galeria({ route, navigation }) {
   const [image, setImage] = useState(null);
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
+  const { nombreComunidad, nombreProvincia } = route.params;
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -17,9 +19,9 @@ export default function Galeria({ navigation }) {
     });
 
     console.log(result);
-
+    console.log("estoy en galeria", nombreComunidad, nombreProvincia)
     if (!result.cancelled) {
-      navigation.navigate('New', { fotoSeleccionada: result.assets[0].uri }); // Envía la URI de la imagen a la pantalla de Nueva Incidencia
+      navigation.navigate('New', { uri: result.assets[0].uri, nombreComunidad, nombreProvincia }); // Envía la URI de la imagen a la pantalla de Nueva Incidencia
     }
   };
 

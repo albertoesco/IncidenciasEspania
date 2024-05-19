@@ -1,43 +1,49 @@
+
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, Image } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
-import * as ImagePicker from 'expo-image-picker';
+//import * as ImagePicker from 'expo-image-picker';
 
 const db = getFirestore(appFirebase);
 
 export default function NewIncidencia({ route, setIncidencias }) {
-    const { nombreComunidad, nombreProvincia } = route.params;
+    const { nombreComunidad, nombreProvincia, uri } = route.params;
     const navigation = useNavigation();
 
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [estado, setEstado] = useState('');
-    const [fotoSeleccionada, setFotoSeleccionada] = useState(null);
+    const [fotoSeleccionada, setFotoSeleccionada] = useState(uri);
 
     const handleNewIncidencia = async () => {
+
+        if (!nombre.trim() || !descripcion.trim() || !estado.trim()) {
+            alert('Por favor ingrese todos los campos');
+            return;
+        }
+
+        const fechaActual = new Date();
+        const fechaFormateada = fechaActual.toISOString();
+
+
+        
         try {
-            if (!nombre.trim() || !descripcion.trim() || !estado.trim()) {
-                alert('Por favor ingrese todos los campos');
-                return;
-            }
-
-            const fechaActual = new Date();
-            const fechaFormateada = fechaActual.toISOString();
-
+            console.log(uri)
             await addDoc(collection(db, 'comunidades', nombreComunidad, 'provincias', nombreProvincia, 'incidencias'), {
                 nombre: nombre,
                 descripcion: descripcion,
                 estado: estado,
-                fecha: fechaFormateada
+                fecha: fechaFormateada,
+                uri: uri
             });
-
-            navigation.goBack();
-            setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada }]);
-        } catch (error) {
-            console.error('Error al crear incidencia:', error);
+        } catch (e) {
+            console.error('Error al crear incidencia:',  e.message, e.stack);
         }
+        navigation.goBack();
+        setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada }]);
+
     };
 
     return (
@@ -70,7 +76,7 @@ export default function NewIncidencia({ route, setIncidencias }) {
             </View>
             <View style={styles.buttonContainer}>
                 {/* Cambiado el onPress para que navegue a la pantalla "Galería" */}
-                <Button title="Abrir Galería" onPress={() => navigation.navigate('Galeria')} />
+                <Button title="Abrir Galería" onPress={() => navigation.navigate('Galeria', {nombreComunidad, nombreProvincia})} />
                 <Button title="Crear Incidencia" onPress={handleNewIncidencia} />
             </View>
             {fotoSeleccionada && (
@@ -79,6 +85,7 @@ export default function NewIncidencia({ route, setIncidencias }) {
                     <Image source={{ uri: fotoSeleccionada }} style={styles.image} />
                 </View>
             )}
+            
         </View>
     );
 }
