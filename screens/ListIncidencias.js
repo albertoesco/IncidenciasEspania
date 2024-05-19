@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Button } from "react-native";
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
 import appFirebase from "../firebase/credenciales";
-import { getFirestore, collection, getDocs, onSnapshot, deleteDoc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, deleteDoc } from "firebase/firestore";
 
 const db = getFirestore(appFirebase);
 
@@ -52,7 +52,7 @@ export default function ListIncidencias({ route, navigation }) {
             <Text style={styles.title}>Incidencias de {nombreProvincia}</Text>
             <ScrollView contentContainerStyle={styles.scrollView}>
                 {incidencias.map((incidencia, index) => (
-                    <TouchableOpacity key={index} style={styles.card} onPress={() => handleIncidenciaPress(incidencia.data)}>
+                    <TouchableOpacity key={index} style={styles.card} onPress={() => handleIncidenciaPress(incidencia)}>
                         <Text style={styles.cardText}>{incidencia.data.nombre}</Text>
                         <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteIncidencia(incidencia)}>
                             <Text style={styles.deleteButtonText}>Eliminar</Text>
