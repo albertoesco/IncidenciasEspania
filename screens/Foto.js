@@ -1,22 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Camera, CameraType } from 'expo-camera';
+import React, { useState, useRef } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { storage } from '../firebase/credenciales';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as MediaLibrary from 'expo-media-library';
 
-export default function Foto() {
-  const [type, setType] = useState(CameraType.back);
-  const [permission, requestPermission] = Camera.useCameraPermissions();
+export default function Foto({ route }) {
+  const [facing, setFacing] = useState('back');
+  const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef(null);
-
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Permission to access camera was denied');
-      }
-    })();
-  }, []);
 
   if (!permission) {
     return <View />;
@@ -25,47 +15,53 @@ export default function Foto() {
   if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <Text style={{ textAlign: 'center' }}>Necesitamos tu permiso para mostrar la cámara</Text>
-        <Button onPress={requestPermission} title="Conceder permiso" />
+        <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
+        <Button onPress={requestPermission} title="grant permission" />
       </View>
     );
   }
 
-  const toggleCameraType = () => {
-    setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
-  };
+  // Después de la destructuración de route.params
+  const { nombreComunidad, nombreProvincia } = route.params; 
 
-  const takePicture = async () => {
-    try {
-      const photo = await cameraRef.current.takePictureAsync();
-      console.log('Foto capturada:', photo.uri);
+  // Agregar un console.log para verificar los nombres de la comunidad y la provincia
+  console.log("Nombre de la Comunidad:", nombreComunidad);
+  console.log("Nombre de la Provincia:", nombreProvincia);
 
-      const storageRef = ref(storage, `comunidades/nombreComunidad/provincias/nombreProvincia/incidencias/${new Date().getTime()}.jpg`);
-      const uploadTask = uploadBytesResumable(storageRef, photo.base64);
-      console.log('Foto subida con éxito:', uploadTask);
+  function toggleCameraFacing() {
+    setFacing(current => (current === 'back' ? 'front' : 'back'));
+  }
 
-      const downloadURL = await getDownloadURL(uploadTask.ref);
-      console.log('Foto disponible en:', downloadURL);
-    } catch (error) {
-      console.error('Error al tomar la foto:', error);
-      alert('Error al tomar la foto. Inténtalo de nuevo.');
+  async function takePicture() {
+    if (cameraRef.current) {
+      const options = { quality: 1 };
+      const photo = await cameraRef.current.takePictureAsync(options);
+      savePhotoToGallery(photo.uri);
+      console.log("Picture taken!");
     }
-  };
+  }
+
+  async function savePhotoToGallery(uri) {
+    try {
+      await MediaLibrary.saveToLibraryAsync(uri);
+      console.log("Photo saved to gallery.");
+    } catch (error) {
+      console.error("Error saving photo to gallery:", error);
+    }
+  }
 
   return (
     <View style={styles.container}>
-      {permission.granted && (
-        <Camera style={styles.camera} type={type} ref={cameraRef}>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={toggleCameraType}>
-              <Text style={styles.text}>Cambiar cámara</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={takePicture}>
-              <Text style={styles.text}>Tomar foto</Text>
-            </TouchableOpacity>
-          </View>
-        </Camera>
-      )}
+      <CameraView style={styles.camera} ref={cameraRef} facing={facing}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+            <Text style={styles.text}>Flip Camera</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={takePicture}>
+            <Text style={styles.text}>Take Picture</Text>
+          </TouchableOpacity>
+        </View>
+      </CameraView>
     </View>
   );
 }
@@ -81,12 +77,13 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    margin: 20,
+    backgroundColor: 'transparent',
+    margin: 64,
   },
   button: {
+    flex: 1,
     alignSelf: 'flex-end',
+    alignItems: 'center',
   },
   text: {
     fontSize: 24,

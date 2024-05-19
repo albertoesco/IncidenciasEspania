@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import 'react-native-gesture-handler';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
+import { appFirebase } from './firebase/credenciales';
 
 // Importar los componentes
 import ListComunidades from './screens/ListComunidades';
@@ -13,8 +14,10 @@ import NewIncidencia from './screens/NewIncidencia';
 import Foto from './screens/Foto';
 import Chat from './screens/Chat';
 import Login from './screens/Login';
+import Galeria from './screens/Galeria';
 
 export default function App() {
+
 
   const Stack = createStackNavigator();
 
@@ -41,6 +44,7 @@ export default function App() {
         <Stack.Screen name="Foto" component={Foto} />
         <Stack.Screen name="Chat" component={Chat} />
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Galeria" component={Galeria} />
       </Stack.Navigator>
     )
   }

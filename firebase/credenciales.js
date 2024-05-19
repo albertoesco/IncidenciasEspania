@@ -1,7 +1,8 @@
 // Importa las funciones necesarias de Firebase
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore"; // Agrega esta importación
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage"; // Corrige la importación del módulo de almacenamiento de Firebase
 
 // Tu configuración de Firebase
 const firebaseConfig = {
@@ -22,4 +23,8 @@ const db = getFirestore(appFirebase);
 // Obtiene una instancia de Authentication
 const auth = getAuth(appFirebase);
 
-export { appFirebase, db, auth }; // Exporta la instancia de la aplicación y de Firestore para usarlas en otros archivos
+// Obtiene una instancia de Storage
+const storage = getStorage(appFirebase); // Corrige la obtención de la instancia de Storage
+
+// Exporta la instancia de la aplicación, Firestore y Storage para usarlas en otros archivos
+export { appFirebase, db, auth, storage };
