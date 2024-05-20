@@ -1,10 +1,10 @@
-
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
-//import * as ImagePicker from 'expo-image-picker';
+import * as ImagePicker from 'expo-image-picker';
+import { MaterialIcons } from 'react-native-vector-icons';
 
 const db = getFirestore(appFirebase);
 
@@ -17,38 +17,50 @@ export default function NewIncidencia({ route, setIncidencias }) {
     const [estado, setEstado] = useState('');
     const [fotoSeleccionada, setFotoSeleccionada] = useState(uri);
 
-    const handleNewIncidencia = async () => {
+    const [errorMessage, setErrorMessage] = useState('');
 
-        if (!nombre.trim() || !descripcion.trim() || !estado.trim()) {
-            alert('Por favor ingrese todos los campos');
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setErrorMessage('');
+        }, 3000);
+
+        return () => clearTimeout(timer);
+    }, [errorMessage]);
+
+    const handleNewIncidencia = async () => {
+        if (!nombre.trim() || !descripcion.trim() || !estado.trim() || !fotoSeleccionada) {
+            setErrorMessage('Por favor complete todos los campos y seleccione una foto');
             return;
         }
 
         const fechaActual = new Date();
         const fechaFormateada = fechaActual.toISOString();
 
-
-        
         try {
-            console.log(uri)
             await addDoc(collection(db, 'comunidades', nombreComunidad, 'provincias', nombreProvincia, 'incidencias'), {
                 nombre: nombre,
                 descripcion: descripcion,
                 estado: estado,
                 fecha: fechaFormateada,
-                uri: uri
+                uri: fotoSeleccionada
             });
-        } catch (e) {
-            console.error('Error al crear incidencia:',  e.message, e.stack);
+            navigation.goBack();
+            setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada, uri: fotoSeleccionada }]);
+        } catch (error) {
+            console.error('Error al crear incidencia:', error.message, error.stack);
+            setErrorMessage('No se pudo crear la incidencia. Por favor, inténtelo de nuevo más tarde.');
         }
-        navigation.goBack();
-        setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada, uri: uri }]);
-
     };
 
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Nueva Incidencia</Text>
+            {errorMessage ? (
+                <View style={styles.errorContainer}>
+                    <MaterialIcons name="error" size={24} color="red" />
+                    <Text style={styles.errorText}>{errorMessage}</Text>
+                </View>
+            ) : null}
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Nombre:</Text>
                 <TextInput
@@ -75,8 +87,7 @@ export default function NewIncidencia({ route, setIncidencias }) {
                 />
             </View>
             <View style={styles.buttonContainer}>
-                {/* Cambiado el onPress para que navegue a la pantalla "Galería" */}
-                <Button title="Abrir Galería" onPress={() => navigation.navigate('Galeria', {nombreComunidad, nombreProvincia})} />
+                <Button title="Abrir Galería" onPress={() => navigation.navigate('Galeria', { nombreComunidad, nombreProvincia })} />
                 <Button title="Crear Incidencia" onPress={handleNewIncidencia} />
             </View>
             {fotoSeleccionada && (
@@ -85,7 +96,6 @@ export default function NewIncidencia({ route, setIncidencias }) {
                     <Image source={{ uri: fotoSeleccionada }} style={styles.image} />
                 </View>
             )}
-            
         </View>
     );
 }
@@ -134,5 +144,14 @@ const styles = StyleSheet.create({
         height: 200,
         resizeMode: 'cover',
         marginTop: 10,
+    },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    errorText: {
+        marginLeft: 10,
+        color: 'red',
     },
 });
