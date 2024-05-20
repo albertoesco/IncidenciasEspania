@@ -1,6 +1,6 @@
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, updateDoc } from "firebase/firestore";
@@ -73,7 +73,9 @@ export default function DetailIncidencia({ route }) {
           </View>
         )}
       </View>
-
+      {incidencia.data.uri && ( // Verifica si hay una URI de imagen
+        <Image source={{ uri: incidencia.data.uri }} style={styles.image} /> // Muestra la imagen si está disponible
+      )}
       <Modal
         animationType="fade"
         transparent={true}
@@ -161,5 +163,11 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 20,
     color: "#fff", // Texto blanco para que sea más visible
+  },
+  image: {
+    width: 300, // Ancho deseado de la imagen
+    height: 300, // Alto deseado de la imagen
+    marginTop: 20, // Espacio superior
+    resizeMode: 'cover', // Ajuste de la imagen
   },
 });
