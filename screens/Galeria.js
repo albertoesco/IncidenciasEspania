@@ -31,20 +31,22 @@ export default function Galeria({ route, navigation }) {
       alert('Se requieren permisos de cámara para tomar una foto.');
       return;
     }
-
+  
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-
-    console.log(result);
-
+  
+    console.log(result); // Agregar el console.log aquí
+  
     if (!result.cancelled) {
-      setImage(result.uri);
+      navigation.navigate('New', { uri: result.assets[0].uri, nombreComunidad, nombreProvincia });
     }
   };
+  
+  
 
   const toggleCameraFacing = () => {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
