@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import Icon from 'react-native-vector-icons/FontAwesome';
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, collection, onSnapshot, deleteDoc } from "firebase/firestore";
 
@@ -49,7 +50,12 @@ export default function ListIncidencias({ route, navigation }) {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Incidencias de {nombreProvincia}</Text>
+            <View style={styles.headerContainer}>
+                <Text style={styles.title}>Incidencias de {nombreProvincia}</Text>
+                <TouchableOpacity style={styles.addButton} onPress={handleNewIncidencia}>
+                    <Icon name="plus" size={20} color="#fff" />
+                </TouchableOpacity>
+            </View>
             <ScrollView contentContainerStyle={styles.scrollView}>
                 {incidencias.map((incidencia, index) => (
                     <TouchableOpacity key={index} style={styles.card} onPress={() => handleIncidenciaPress(incidencia)}>
@@ -60,9 +66,6 @@ export default function ListIncidencias({ route, navigation }) {
                     </TouchableOpacity>
                 ))}
             </ScrollView>
-            <TouchableOpacity style={styles.addButton} onPress={handleNewIncidencia}>
-                <Text style={styles.addButtonText}>Nueva Incidencia</Text>
-            </TouchableOpacity>
         </View>
     );
 }
@@ -72,19 +75,24 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#fffc00", // Fondo amarillo dorado
     },
+    headerContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 10,
+    },
     title: {
         fontSize: 24,
         fontWeight: "bold",
-        marginBottom: 20,
-        marginLeft: 20,
-        marginTop: 10,
         color: "#ad1519", // Texto rojo oscuro
     },
     scrollView: {
         alignItems: "center",
+        paddingBottom: 20, // Espacio adicional para que el último elemento no quede tapado
     },
     card: {
-        width: "100%", // Ancho máximo
+        width: "90%", // Ancho ajustado para evitar que toque los bordes
         backgroundColor: "#ffdb00", // Fondo amarillo dorado
         padding: 20,
         marginVertical: 10,
@@ -119,21 +127,12 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     addButton: {
-        position: "absolute",
-        bottom: 20,
-        right: 20,
         backgroundColor: "#00008B", // Fondo azul oscuro
         borderRadius: 25,
-        paddingVertical: 15,
-        paddingHorizontal: 25,
-        elevation: 5,
-        shadowColor: "#000", // Color de sombra negro
-        shadowOpacity: 0.2, // Opacidad de la sombra
-        shadowRadius: 5, // Radio de la sombra
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
+        padding: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginLeft: 10,
     },
     addButtonText: {
         color: "#fff", // Texto blanco

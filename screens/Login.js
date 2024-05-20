@@ -5,6 +5,7 @@ import { auth } from '../firebase/credenciales';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,8 +13,8 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [isModalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [username, setUsername] = useState('');
   const navigation = useNavigation();
+  const { currentUser } = useAuth();
 
   const handleEmailChange = (text) => setEmail(text);
   const handlePasswordChange = (text) => setPassword(text);
@@ -39,14 +40,19 @@ export default function Login() {
     setModalVisible(true);
   };
 
-  const hideModal = () => setModalVisible(false);
+  const hideModal = () => {
+    setModalVisible(false);
+    setError(null);
+  };
 
   const handleSignInOrSignUp = async () => {
     if (!validateInput()) return;
+    if (currentUser) {
+      showModal('A user is already logged in. Please sign out first.');
+      return;
+    }
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = email.split('@')[0];
-      setUsername(user);
+      await signInWithEmailAndPassword(auth, email, password);
       showModal('Logged in successfully');
       setTimeout(() => {
         hideModal();
@@ -54,28 +60,34 @@ export default function Login() {
       }, 1000);
     } catch (signInError) {
       if (signInError.code === 'auth/user-not-found') {
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          const user = email.split('@')[0];
-          setUsername(user);
-          showModal('Registered successfully');
-          setTimeout(() => {
-            hideModal();
-            navigation.navigate('Comunidades');
-          }, 1000);
-        } catch (signUpError) {
-          setError(signUpError.message);
-        }
+        setError('No user found with this email. Please register.');
       } else {
         setError(signInError.message);
       }
     }
   };
 
+  const handleSignUp = async () => {
+    if (!validateInput()) return;
+    if (currentUser) {
+      showModal('A user is already logged in. Please sign out first.');
+      return;
+    }
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      showModal('Registered successfully');
+      setTimeout(() => {
+        hideModal();
+        navigation.navigate('Comunidades');
+      }, 1000);
+    } catch (signUpError) {
+      setError(signUpError.message);
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      setUsername('');
       showModal('Signed out successfully');
       setTimeout(() => {
         hideModal();
@@ -90,7 +102,7 @@ export default function Login() {
     <View style={styles.container}>
       <View style={styles.userContainer}>
         <Text style={styles.userLabel}>Username:</Text>
-        <Text style={styles.username}>{username}</Text>
+        <Text style={styles.username}>{currentUser ? currentUser.email.split('@')[0] : ''}</Text>
       </View>
       <Text style={styles.title}>Login / Register</Text>
       <TextInput
@@ -111,16 +123,22 @@ export default function Login() {
       )}
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.button} onPress={handleSignInOrSignUp}>
-          <Text style={styles.buttonText}>Login / Register</Text>
+          <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={handleSignOut}>
           <Text style={styles.buttonText}>Sign Out</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.button} onPress={handleSignUp}>
+          <Text style={styles.buttonText}>Register</Text>
+        </TouchableOpacity>
       </View>
-      <Modal isVisible={isModalVisible}>
+      <Modal isVisible={isModalVisible || error !== null}>
         <View style={styles.modalContent}>
-          <Icon name="check-circle" size={50} color="green" />
-          <Text style={styles.modalText}>{modalMessage}</Text>
+          <Icon name={error ? "error" : "check-circle"} size={50} color={error ? "red" : "green"} />
+          <Text style={styles.modalText}>{modalMessage || error}</Text>
+          <TouchableOpacity style={styles.closeButton} onPress={hideModal}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
     </View>
@@ -196,5 +214,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginVertical: 10,
     textAlign: 'center',
+  },
+  closeButton: {
+    marginTop: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

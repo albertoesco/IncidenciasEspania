@@ -42,7 +42,7 @@ export default function NewIncidencia({ route, setIncidencias }) {
             console.error('Error al crear incidencia:',  e.message, e.stack);
         }
         navigation.goBack();
-        setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada }]);
+        setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada, uri: uri }]);
 
     };
 

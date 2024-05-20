@@ -1,3 +1,4 @@
+// App.js
 import * as React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import 'react-native-gesture-handler';
@@ -16,9 +17,9 @@ import Chat from './screens/Chat';
 import Login from './screens/Login';
 import Galeria from './screens/Galeria';
 
+import { AuthProvider } from './context/AuthContext';
+
 export default function App() {
-
-
   const Stack = createStackNavigator();
 
   function MyStack() {
@@ -50,9 +51,11 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <MyStack />
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <MyStack />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 
