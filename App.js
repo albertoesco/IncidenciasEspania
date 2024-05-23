@@ -1,6 +1,6 @@
 // App.js
 import * as React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import 'react-native-gesture-handler';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
@@ -16,6 +16,7 @@ import Foto from './screens/Foto';
 import Chat from './screens/Chat';
 import Login from './screens/Login';
 import Galeria from './screens/Galeria';
+import PantallaCarga from './screens/PantallaCarga';
 
 import { AuthProvider } from './context/AuthContext';
 
@@ -37,6 +38,11 @@ export default function App() {
           },
         }}
       >
+        <Stack.Screen 
+          name="Carga" 
+          component={PantallaCarga} 
+          options={{ headerShown: false }} // Ocultar el header en la pantalla de carga
+        />
         <Stack.Screen name="Comunidades" component={ListComunidades} />
         <Stack.Screen name="Provincias" component={ListProvincias} />
         <Stack.Screen name="Incidencias" component={ListIncidencias} />
