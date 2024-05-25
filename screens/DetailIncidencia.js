@@ -1,6 +1,6 @@
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, Image } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, Image, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, updateDoc } from "firebase/firestore";
@@ -8,7 +8,7 @@ import { getFirestore, updateDoc } from "firebase/firestore";
 const db = getFirestore(appFirebase);
 
 export default function DetailIncidencia({ route }) {
-  const { incidencia } = route.params;
+  const { incidencia, nombreProvincia } = route.params;
   const [editing, setEditing] = useState(false);
   const [newEstado, setNewEstado] = useState(incidencia.data.estado);
   const [modalVisible, setModalVisible] = useState(false);
@@ -18,7 +18,7 @@ export default function DetailIncidencia({ route }) {
   };
 
   const handleSaveEstado = async () => {
-    if (newEstado.trim() === "") {
+    if (!newEstado.trim()) {
       Alert.alert("Error", "El estado no puede estar vacío.");
       return;
     }
@@ -46,11 +46,21 @@ export default function DetailIncidencia({ route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{incidencia.data.nombre}</Text>
-      <Text style={styles.text}>Descripción: {incidencia.data.descripcion}</Text>
-      <Text style={styles.text}>Fecha: {incidencia.data.fecha}</Text>
+      <Text style={styles.title}>Detalle de Incidencia ({incidencia.data.nombre})</Text>
+      <View style={styles.item}>
+        <Text style={styles.label}>Nombre:</Text>
+        <Text style={[styles.value, styles.italic]}> {incidencia.data.nombre}</Text>
+      </View>
+      <View style={styles.item}>
+        <Text style={styles.label}>Descripción:</Text>
+        <Text style={[styles.value, styles.italic]}> {incidencia.data.descripcion}</Text>
+      </View>
+      <View style={styles.item}>
+        <Text style={styles.label}>Fecha:</Text>
+        <Text style={[styles.value, styles.italic]}> {incidencia.data.fecha}</Text>
+      </View>
       <View style={styles.estadoContainer}>
-        <Text style={styles.estadoText}>Estado:</Text>
+        <Text style={[styles.estadoText, styles.bold]}>Estado:</Text>
         {editing ? (
           <View style={styles.editContainer}>
             <TextInput
@@ -61,14 +71,15 @@ export default function DetailIncidencia({ route }) {
               autoFocus
             />
             <TouchableOpacity style={styles.saveButton} onPress={handleSaveEstado}>
-              <Text style={styles.saveButtonText}>Guardar</Text>
+              <Text style={[styles.saveButtonText, styles.italic]}>Guardar</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.estadoValueContainer}>
-            <Text style={styles.estadoValue}>{incidencia.data.estado}</Text>
+            <Ionicons name="checkmark-done" size={24} color="#fff" style={[styles.icon, styles.bold]} />
+            <Text style={[styles.estadoValue, styles.italic]}>{incidencia.data.estado}</Text>
             <TouchableOpacity style={styles.editButton} onPress={handleEditEstado}>
-              <Ionicons name="create-outline" size={24} color="black" />
+              <Ionicons name="create-outline" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
         )}
@@ -77,7 +88,7 @@ export default function DetailIncidencia({ route }) {
         <Image source={{ uri: incidencia.data.uri }} style={styles.image} /> // Muestra la imagen si está disponible
       )}
       <Modal
-        animationType="fade"
+        animationType="slide"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => {
@@ -85,7 +96,7 @@ export default function DetailIncidencia({ route }) {
         }}
       >
         <View style={styles.modalView}>
-          <Icon name="check-circle" size={80} color="green" />
+          <Icon name="check-circle" size={80} color="#4a90e2" />
           <Text style={styles.modalText}>Estado actualizado correctamente</Text>
         </View>
       </Modal>
@@ -96,30 +107,52 @@ export default function DetailIncidencia({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fffc00", // Fondo amarillo dorado
-    alignItems: "center",
-    justifyContent: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: "#fff",
+    padding: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#ad1519", // Texto rojo oscuro
+    marginBottom: 20,
+    textAlign: 'center',
+    color: "#18315f",
   },
-  text: {
+  label: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: "#18315f",
+  },
+  value: {
     fontSize: 18,
     marginBottom: 5,
-    color: "#ad1519", // Texto rojo oscuro
+    color: "#18315f",
+  },
+  italic: {
+    fontStyle: 'italic',
+  },
+  bold: {
+    fontWeight: 'bold',
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   estadoContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 10,
+    marginBottom: 20,
+    backgroundColor: '#4a90e2',
+    padding: 10,
+    borderRadius: 10,
   },
   estadoText: {
     fontSize: 18,
     marginRight: 10,
-    color: "#ad1519",
+    color: "#fff",
   },
   estadoValueContainer: {
     flexDirection: "row",
@@ -127,7 +160,7 @@ const styles = StyleSheet.create({
   },
   estadoValue: {
     fontSize: 18,
-    color: "#ad1519",
+    color: "#fff",
   },
   editButton: {
     marginLeft: 10,
@@ -137,37 +170,42 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   editInput: {
-    width: 150,
+    flex: 1,
     borderWidth: 1,
-    borderColor: "#ad1519",
-    borderRadius: 5,
-    padding: 5,
+    borderColor: "#18315f",
+    borderRadius: 10,
+    padding: 10,
     marginRight: 10,
+    color: "#18315f",
+    backgroundColor: "#fff",
   },
   saveButton: {
-    backgroundColor: "#ad1519",
+    backgroundColor: "#18315f",
     padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
   },
   saveButtonText: {
-    color: "white",
+    color: "#fff",
     fontWeight: "bold",
   },
   modalView: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Fondo más opaco
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
   },
   modalText: {
     marginTop: 20,
     fontSize: 20,
-    color: "#fff", // Texto blanco para que sea más visible
+    color: "#fff",
   },
   image: {
-    width: 300, // Ancho deseado de la imagen
-    height: 300, // Alto deseado de la imagen
-    marginTop: 20, // Espacio superior
-    resizeMode: 'cover', // Ajuste de la imagen
+    width: 300,
+    height: 300,
+    marginTop: 20,
+    resizeMode: 'cover',
+    borderRadius: 10,
+    borderWidth: 3,
+    borderColor: "#18315f",
   },
 });

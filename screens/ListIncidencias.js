@@ -73,7 +73,7 @@ export default function ListIncidencias({ route, navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fffc00", // Fondo amarillo dorado
+        backgroundColor: "#f0f0f0", // Fondo gris claro
     },
     headerContainer: {
         flexDirection: 'row',
@@ -81,11 +81,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingTop: 10,
+        backgroundColor: "#ffffff", // Fondo blanco
+        borderBottomWidth: 3,
+        borderBottomColor: "#18315f", // Cambia el color del borde aquí
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
-        color: "#ad1519", // Texto rojo oscuro
+        color: "#18315f", // Texto gris oscuro
     },
     scrollView: {
         alignItems: "center",
@@ -93,12 +96,12 @@ const styles = StyleSheet.create({
     },
     card: {
         width: "90%", // Ancho ajustado para evitar que toque los bordes
-        backgroundColor: "#ffdb00", // Fondo amarillo dorado
+        backgroundColor: "#ffffff", // Fondo blanco
         padding: 20,
         marginVertical: 10,
         borderRadius: 15,
         elevation: 5,
-        shadowColor: "#ad1519", // Color de sombra rojo oscuro
+        shadowColor: "#000", // Color de sombra negro
         shadowOpacity: 0.2, // Opacidad de la sombra
         shadowRadius: 5, // Radio de la sombra
         shadowOffset: {
@@ -108,12 +111,14 @@ const styles = StyleSheet.create({
         flexDirection: "row", // Alinear el botón de eliminación a la derecha
         justifyContent: "space-between", // Alinear elementos a los extremos
         alignItems: "center", // Alinear verticalmente
+        borderWidth: 3,
+        borderColor: "#18315f", // Cambia el color del borde aquí
     },
     cardText: {
         fontSize: 18,
         fontWeight: "bold",
         textAlign: "center",
-        color: "#ad1519", // Texto rojo oscuro
+        color: "#333333", // Texto gris oscuro
     },
     deleteButton: {
         backgroundColor: "#dc3545", // Color de fondo rojo
@@ -127,12 +132,11 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
     addButton: {
-        backgroundColor: "#00008B", // Fondo azul oscuro
+        backgroundColor: "#18315f", // Fondo azul oscuro
         borderRadius: 25,
         padding: 10,
         justifyContent: 'center',
         alignItems: 'center',
-        marginLeft: 10,
     },
     addButtonText: {
         color: "#fff", // Texto blanco

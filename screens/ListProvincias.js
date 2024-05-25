@@ -1,11 +1,13 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Image } from "react-native";
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, ImageBackground } from "react-native";
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 const db = getFirestore(appFirebase);
+const storage = getStorage(appFirebase);
 
 export default function ListProvincias({ route, navigation }) {
     const { nombreComunidad } = route.params;
@@ -16,9 +18,18 @@ export default function ListProvincias({ route, navigation }) {
             try {
                 const provinciasRef = collection(db, "comunidades", nombreComunidad, "provincias");
                 const provinciasSnapshot = await getDocs(provinciasRef);
-                const provinciasData = provinciasSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
+                const provinciasData = await Promise.all(provinciasSnapshot.docs.map(async doc => {
+                    const provinciaData = doc.data();
+                    // Obtiene la URL de descarga de la imagen de la provincia desde Storage
+                    const imagePath = `comunidades/${nombreComunidad}/provincias/${provinciaData.nombre}/${provinciaData.nombre}.jpg`;
+                    try {
+                        const url = await getDownloadURL(ref(storage, imagePath));
+                        provinciaData.imageURL = url;
+                    } catch (error) {
+                        console.error(`Error al obtener la imagen de ${provinciaData.nombre}:`, error);
+                        provinciaData.imageURL = null;
+                    }
+                    return provinciaData;
                 }));
                 setProvincias(provinciasData);
             } catch (error) {
@@ -40,9 +51,16 @@ export default function ListProvincias({ route, navigation }) {
                 keyExtractor={(item) => item.id}
                 renderItem={({ item }) => (
                     <TouchableOpacity style={styles.card} onPress={() => handleProvinciaPress(item.nombre)}>
-                        <Text style={styles.cardText}>{item.nombre}</Text>
+                        <ImageBackground
+                            source={{ uri: item.imageURL }}
+                            style={styles.imageBackground}
+                            imageStyle={{ borderRadius: 15 }}
+                        >
+                            <Text style={styles.cardText}>{item.nombre}</Text>
+                        </ImageBackground>
                     </TouchableOpacity>
                 )}
+                contentContainerStyle={styles.flatListContainer} // Centra los cards en la pantalla
             />
             <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('Chat')}>
                 <Icon name="comments" size={24} color="white" />
@@ -55,35 +73,47 @@ export default function ListProvincias({ route, navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fffc00', // Fondo gris claro
-        alignItems: 'center', // Alinear elementos en el centro horizontalmente
-        justifyContent: 'center', // Alinear elementos en el centro verticalmente
+        backgroundColor: '#f0f0f0',
+    },
+    flatListContainer: {
+        alignItems: 'center', // Centra horizontalmente los items en la FlatList
+        justifyContent: 'center', // Centra verticalmente los items en la FlatList
     },
     card: {
-        width: '100%',
-        backgroundColor: '#ffdb00', // Amarillo dorado
-        padding: 20,
+        width: '90%',
+        aspectRatio: 16 / 9,
         marginVertical: 10,
-        borderRadius: 10,
+        borderRadius: 15,
+        overflow: 'hidden',
+        borderWidth: 3,
+        borderColor: '#18315f', // Cambia el color del borde aquí
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+    },
+    imageBackground: {
+        flex: 1,
+        resizeMode: 'cover',
+        justifyContent: 'center',
         alignItems: 'center',
-        justifyContent: 'flex-start',
-        elevation: 5,
-        borderWidth: 2,
-        borderColor: '#ad1519', // Borde rojo
     },
     cardText: {
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: 'bold',
+        color: '#ffff', // Cambia el color del texto aquí
         textAlign: 'center',
-        color: '#ad1519', // Rojo oscuro
+        textShadowColor: 'rgba(0, 0, 0, 0.75)',
+        textShadowOffset: { width: 2, height: 2 },
+        textShadowRadius: 10,
     },
     chatButton: {
         position: 'absolute',
         bottom: 20,
         right: 20,
-        backgroundColor: '#00008B', // Azul oscuro
-        borderRadius: 10,
-        padding: 10,
+        backgroundColor: '#18315f',
+        borderRadius: 30,
+        padding: 15,
         elevation: 5,
         alignItems: 'center',
         justifyContent: 'center',

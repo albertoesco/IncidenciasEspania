@@ -1,6 +1,5 @@
-// App.js
 import * as React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Image } from 'react-native';
 import 'react-native-gesture-handler';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
@@ -30,11 +29,23 @@ export default function App() {
         gestureDirection="horizontal" // Configurar la dirección del gesto
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#ad1519', // Color de fondo del header
+            backgroundColor: '#18315f', // Color de fondo del header (azul oscuro)
+            elevation: 0, // Quitar sombra en Android
+            shadowOpacity: 0, // Quitar sombra en iOS
           },
           headerTintColor: '#fff', // Color del texto e íconos del header
           headerTitleStyle: {
             fontWeight: 'bold',
+          },
+          headerTitleAlign: 'center', // Centrar el título en el header
+          headerRight: () => (
+            <Image
+              source={require('./assets/splash.png')} // Ruta de la imagen del logo
+              style={styles.logo}
+            />
+          ),
+          headerRightContainerStyle: {
+            marginRight: 10, // Ajustar el margen derecho del logo
           },
         }}
       >
@@ -43,15 +54,51 @@ export default function App() {
           component={PantallaCarga} 
           options={{ headerShown: false }} // Ocultar el header en la pantalla de carga
         />
-        <Stack.Screen name="Comunidades" component={ListComunidades} />
-        <Stack.Screen name="Provincias" component={ListProvincias} />
-        <Stack.Screen name="Incidencias" component={ListIncidencias} />
-        <Stack.Screen name="Detail" component={DetailIncidencia} />
-        <Stack.Screen name="New" component={NewIncidencia} />
-        <Stack.Screen name="Foto" component={Foto} />
-        <Stack.Screen name="Chat" component={Chat} />
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Galeria" component={Galeria} />
+        <Stack.Screen 
+          name="Comunidades" 
+          component={ListComunidades} 
+          options={{ headerTitle: 'Comunidades' }} // Personalizar el título del header
+        />
+        <Stack.Screen 
+          name="Provincias" 
+          component={ListProvincias} 
+          options={{ title: 'Provincias' }} // Personalizar el título del header
+        />
+        <Stack.Screen 
+          name="Incidencias" 
+          component={ListIncidencias} 
+          options={{ title: 'Incidencias' }} // Personalizar el título del header
+        />
+        <Stack.Screen 
+          name="Detail" 
+          component={DetailIncidencia} 
+          options={{ title: 'Detalle de la Incidencia' }} // Personalizar el título del header
+        />
+        <Stack.Screen 
+          name="New" 
+          component={NewIncidencia} 
+          options={{ title: 'Nueva Incidencia' }} // Personalizar el título del header
+        />
+        <Stack.Screen 
+          name="Foto" 
+          component={Foto} 
+          options={{ title: 'Foto' }} // Personalizar el título del header
+        />
+        <Stack.Screen 
+          name="Chat" 
+          component={Chat} 
+          options={{ title: 'Chat' }} // Personalizar el título del header
+        />
+        <Stack.Screen 
+          name="Login" 
+          component={Login} 
+          options={{ title: 'Login' }} // Personalizar el título del header
+        />
+        <Stack.Screen 
+          name="Galeria" 
+          component={Galeria} 
+          options={{ title: 'Galería' }} // Personalizar el título del header
+        />
       </Stack.Navigator>
     )
   }
@@ -66,10 +113,9 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+  logo: {
+    width: 120, // Ancho deseado del logo
+    height: 40, // Alto deseado del logo
+    resizeMode: 'contain', // Ajuste de la imagen
   },
 });
