@@ -33,7 +33,7 @@ export default function DetailIncidencia({ route }) {
         setModalVisible(true);
         setTimeout(() => {
           setModalVisible(false);
-        }, 2000); // Cerrar modal después de 2 segundos
+        }, 2000); 
       } else {
         console.error("Referencia del documento no válida:", incidencia.ref);
         Alert.alert("Error", "Referencia del documento no válida.");
@@ -84,8 +84,8 @@ export default function DetailIncidencia({ route }) {
           </View>
         )}
       </View>
-      {incidencia.data.uri && ( // Verifica si hay una URI de imagen
-        <Image source={{ uri: incidencia.data.uri }} style={styles.image} /> // Muestra la imagen si está disponible
+      {incidencia.data.uri && (
+        <Image source={{ uri: incidencia.data.uri }} style={styles.image} /> 
       )}
       <Modal
         animationType="slide"
@@ -145,9 +145,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
     marginBottom: 20,
-    backgroundColor: '#4a90e2',
+    backgroundColor: '#18315f',
     padding: 10,
     borderRadius: 10,
+    marginLeft: 25,
+    marginRight: 25,
   },
   estadoText: {
     fontSize: 18,

@@ -5,7 +5,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { appFirebase } from './firebase/credenciales';
 
-// Importar los componentes
 import ListComunidades from './screens/ListComunidades';
 import ListProvincias from './screens/ListProvincias';
 import ListIncidencias from './screens/ListIncidencias';
@@ -22,92 +21,86 @@ import { AuthProvider } from './context/AuthContext';
 export default function App() {
   const Stack = createStackNavigator();
 
-  function MyStack() {
-    return (
-      <Stack.Navigator
-        gestureEnabled={true} // Habilitar los gestos de navegación
-        gestureDirection="horizontal" // Configurar la dirección del gesto
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#18315f', // Color de fondo del header (azul oscuro)
-            elevation: 0, // Quitar sombra en Android
-            shadowOpacity: 0, // Quitar sombra en iOS
-          },
-          headerTintColor: '#fff', // Color del texto e íconos del header
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          headerTitleAlign: 'center', // Centrar el título en el header
-          headerRight: () => (
-            <Image
-              source={require('./assets/In.png')} // Ruta de la imagen del logo
-              style={styles.logo}
-            />
-          ),
-          headerRightContainerStyle: {
-            marginRight: 0, // Ajustar el margen derecho del logo
-            paddingRight: 10, // Añadir algo de padding a la derecha
-          },
-        }}
-      >
-        <Stack.Screen 
-          name="Carga" 
-          component={PantallaCarga} 
-          options={{ headerShown: false }} // Ocultar el header en la pantalla de carga
-        />
-        <Stack.Screen 
-          name="Comunidades" 
-          component={ListComunidades} 
-          options={{ headerTitle: 'Comunidades' }} // Personalizar el título del header
-        />
-        <Stack.Screen 
-          name="Provincias" 
-          component={ListProvincias} 
-          options={{ title: 'Provincias' }} // Personalizar el título del header
-        />
-        <Stack.Screen 
-          name="Incidencias" 
-          component={ListIncidencias} 
-          options={{ title: 'Incidencias' }} // Personalizar el título del header
-        />
-        <Stack.Screen 
-          name="Detail" 
-          component={DetailIncidencia} 
-          options={{ title: 'Detalle de la Incidencia' }} // Personalizar el título del header
-        />
-        <Stack.Screen 
-          name="New" 
-          component={NewIncidencia} 
-          options={{ title: 'Nueva Incidencia' }} // Personalizar el título del header
-        />
-        <Stack.Screen 
-          name="Foto" 
-          component={Foto} 
-          options={{ title: 'Foto' }} // Personalizar el título del header
-        />
-        <Stack.Screen 
-          name="Chat" 
-          component={Chat} 
-          options={{ title: 'Chat' }} // Personalizar el título del header
-        />
-        <Stack.Screen 
-          name="Login" 
-          component={Login} 
-          options={{ title: 'Login' }} // Personalizar el título del header
-        />
-        <Stack.Screen 
-          name="Galeria" 
-          component={Galeria} 
-          options={{ title: 'Galería' }} // Personalizar el título del header
-        />
-      </Stack.Navigator>
-    )
-  }
-
   return (
     <AuthProvider>
       <NavigationContainer>
-        <MyStack />
+        <Stack.Navigator
+          gestureEnabled={true}
+          gestureDirection="horizontal"
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: '#18315f',
+              elevation: 0,
+              shadowOpacity: 0,
+            },
+            headerTintColor: '#fff',
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+            headerTitleAlign: 'center',
+            headerRight: () => (
+              <Image
+                source={require('./assets/In.png')}
+                style={styles.logo}
+              />
+            ),
+            headerRightContainerStyle: {
+              marginRight: 0,
+              paddingRight: 10,
+            },
+          }}
+        >
+          <Stack.Screen 
+            name="Carga" 
+            component={PantallaCarga} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Comunidades" 
+            component={ListComunidades} 
+            options={{ headerTitle: 'Comunidades' }} 
+          />
+          <Stack.Screen 
+            name="Provincias" 
+            component={ListProvincias} 
+            options={{ title: 'Provincias' }} 
+          />
+          <Stack.Screen 
+            name="Incidencias" 
+            component={ListIncidencias} 
+            options={{ title: 'Incidencias' }} 
+          />
+          <Stack.Screen 
+            name="Detail" 
+            component={DetailIncidencia} 
+            options={{ title: 'Detalle de la Incidencia' }} 
+          />
+          <Stack.Screen 
+            name="New" 
+            component={NewIncidencia} 
+            options={{ title: 'Nueva Incidencia' }} 
+          />
+          <Stack.Screen 
+            name="Foto" 
+            component={Foto} 
+            options={{ title: 'Foto' }} 
+          />
+          <Stack.Screen 
+            name="Chat" 
+            component={Chat} 
+            options={{ title: 'Chat' }} 
+          />
+          <Stack.Screen 
+            name="Login" 
+            component={Login} 
+            options={{ title: 'Login' }} 
+          />
+          <Stack.Screen 
+            name="Galeria" 
+            component={Galeria} 
+            options={{ title: 'Galería' }} 
+          />
+        </Stack.Navigator>
       </NavigationContainer>
     </AuthProvider>
   );
@@ -115,8 +108,8 @@ export default function App() {
 
 const styles = StyleSheet.create({
   logo: {
-    width: 100, // Ajustar el ancho del logo
-    height: 100, // Ajustar el alto del logo
-    resizeMode: 'contain', // Ajuste de la imagen
+    width: 100,
+    height: 100,
+    resizeMode: 'contain',
   },
 });

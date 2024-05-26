@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button, Image, View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -21,7 +20,7 @@ export default function Galeria({ route, navigation }) {
     console.log(result);
     console.log("estoy en galeria", nombreComunidad, nombreProvincia)
     if (!result.cancelled) {
-      navigation.navigate('New', { uri: result.assets[0].uri, nombreComunidad, nombreProvincia }); // Envía la URI de la imagen a la pantalla de Nueva Incidencia
+      navigation.navigate('New', { uri: result.assets[0].uri, nombreComunidad, nombreProvincia });
     }
   };
 
@@ -39,26 +38,22 @@ export default function Galeria({ route, navigation }) {
       quality: 1,
     });
   
-    console.log(result); // Agregar el console.log aquí
+    console.log(result);
   
     if (!result.cancelled) {
       navigation.navigate('New', { uri: result.assets[0].uri, nombreComunidad, nombreProvincia });
     }
   };
   
-  
-
   const toggleCameraFacing = () => {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   };
 
   if (!permission) {
-    // Camera permissions are still loading.
     return <View />;
   }
 
   if (!permission.granted) {
-    // Camera permissions are not granted yet.
     return (
       <View style={styles.container}>
         <Text style={{ textAlign: 'center' }}>Se necesitan permisos para mostrar la cámara</Text>

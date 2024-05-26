@@ -21,10 +21,8 @@ export default function Foto({ route }) {
     );
   }
 
-  // Después de la destructuración de route.params
-  const { nombreComunidad, nombreProvincia } = route.params; 
+  const { nombreComunidad, nombreProvincia } = route.params;
 
-  // Agregar un console.log para verificar los nombres de la comunidad y la provincia
   console.log("Nombre de la Comunidad:", nombreComunidad);
   console.log("Nombre de la Provincia:", nombreProvincia);
 

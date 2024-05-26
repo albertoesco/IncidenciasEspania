@@ -10,9 +10,9 @@ import { useAuth } from '../context/AuthContext';
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState(null);
     const [isModalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
+    const [modalType, setModalType] = useState(''); 
     const navigation = useNavigation();
     const { currentUser } = useAuth();
     const spinValue = new Animated.Value(0);
@@ -22,22 +22,23 @@ export default function Login() {
 
     const validateInput = () => {
         if (!email || !password) {
-            setError('Please enter both email and password');
+            showModal('Por favor ingrese email y contraseña', 'error');
             return false;
         }
         if (!email.includes('@') || !email.includes('.')) {
-            setError('Invalid email address');
+            showModal('Email inválido', 'error');
             return false;
         }
         if (password.length < 8) {
-            setError('Password must be at least 8 characters long');
+            showModal('La contraseña debe tener al menos 8 caracteres', 'error');
             return false;
         }
         return true;
     };
 
-    const showModal = (message) => {
+    const showModal = (message, type) => {
         setModalMessage(message);
+        setModalType(type);
         setModalVisible(true);
         Animated.loop(
             Animated.timing(
@@ -50,63 +51,64 @@ export default function Login() {
                 }
             )
         ).start();
+
+        setTimeout(hideModal, 2000);
     };
 
     const hideModal = () => {
         setModalVisible(false);
-        setError(null);
     };
 
     const handleSignInOrSignUp = async () => {
         if (!validateInput()) return;
         if (currentUser) {
-            showModal('A user is already logged in. Please sign out first.');
+            showModal('Ya hay un usuario que ha iniciado sesión. Cierre sesión primero por favor.', 'error');
             return;
         }
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            showModal('Logged in successfully');
+            showModal('Inicio de sesión exitoso', 'success');
             setTimeout(() => {
                 hideModal();
                 navigation.navigate('Comunidades');
-            }, 1000);
+            }, 2000);
         } catch (signInError) {
-            if (signInError.code === 'auth/user-not-found') {
-                setError('No user found with this email. Please register.');
-            } else {
-                setError(signInError.message);
-            }
+            showModal('No existe ese usuario. Regístrese.', 'error');
         }
     };
 
     const handleSignUp = async () => {
         if (!validateInput()) return;
         if (currentUser) {
-            showModal('A user is already logged in. Please sign out first.');
+            showModal('Ya hay un usuario que ha iniciado sesión. Cierre sesión primero por favor.', 'error');
             return;
         }
         try {
             await createUserWithEmailAndPassword(auth, email, password);
-            showModal('Registered successfully');
+            showModal('Registro exitoso', 'success');
             setTimeout(() => {
                 hideModal();
                 navigation.navigate('Comunidades');
-            }, 1000);
+            }, 2000);
         } catch (signUpError) {
-            setError(signUpError.message);
+            showModal('Error durante el registro.', 'error');
         }
     };
 
     const handleSignOut = async () => {
+        if (!currentUser) {
+            showModal('No hay ningún usuario en este momento. Por favor, inicie sesión.', 'error');
+            return;
+        }
         try {
             await signOut(auth);
-            showModal('Signed out successfully');
+            showModal('Cierre de sesión exitoso', 'success');
             setTimeout(() => {
                 hideModal();
-                navigation.navigate('Login');
-            }, 1000);
+                navigation.navigate('Comunidades');
+            }, 2000);
         } catch (error) {
-            setError('Error signing out');
+            showModal('Error durante el cierre de sesión.', 'error');
         }
     };
 
@@ -127,9 +129,6 @@ export default function Login() {
                 value={password}
                 onChangeText={handlePasswordChange}
             />
-            {error && (
-                <Text style={styles.error}>{error}</Text>
-            )}
             <View style={styles.buttonContainer}>
                 <View style={styles.buttonGroup}>
                     <TouchableOpacity style={styles.button} onPress={handleSignInOrSignUp}>
@@ -143,13 +142,10 @@ export default function Login() {
                     <Text style={styles.buttonText}>Cerrar Sesión</Text>
                 </TouchableOpacity>
             </View>
-            <Modal isVisible={isModalVisible || error !== null}>
+            <Modal isVisible={isModalVisible}>
                 <Animated.View style={[styles.modalContent, { transform: [{ rotate: spinValue.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) }] }]}>
-                    <Icon name={error ? "error" : "check-circle"} size={50} color={error ? "#FF6347" : "#32CD32"} />
-                    <Text style={[styles.modalText, { color: error ? "#FF6347" : "#32CD32" }]}>{modalMessage || error}</Text>
-                    <TouchableOpacity style={styles.closeButton} onPress={hideModal}>
-                        <Text style={styles.closeButtonText}>Cerrar</Text>
-                    </TouchableOpacity>
+                    <Icon name={modalType === 'error' ? "error" : "check-circle"} size={50} color={modalType === 'error' ? "#FF0000" : "#32CD32"} />
+                    <Text style={[styles.modalText, { color: modalType === 'error' ? "#FF0000" : "#32CD32" }]}>{modalMessage}</Text>
                 </Animated.View>
             </Modal>
         </View>
@@ -168,12 +164,12 @@ const styles = StyleSheet.create({
         fontSize: 36,
         fontWeight: 'bold',
         marginBottom: 10,
-        color: '#3F51B5',
+        color: '#18315f',
     },
     subtitle: {
         fontSize: 24,
         marginBottom: 20,
-        color: '#3F51B5',
+        color: '#18315f',
     },
     input: {
         width: '100%',
@@ -201,13 +197,9 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#fff',
-        fontSize: 14.5,
+        fontSize: 13,
         fontWeight: 'bold',
         textAlign: 'center',
-    },
-    error: {
-        color: '#FF6347',
-        marginBottom: 10,
     },
     modalContent: {
         backgroundColor: 'white',
@@ -227,9 +219,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#007bff',
         borderRadius: 5,
     },
-  closeButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
+    closeButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
 });

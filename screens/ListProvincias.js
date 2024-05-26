@@ -1,17 +1,23 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, ImageBackground } from "react-native";
-import appFirebase from "../firebase/credenciales";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, ImageBackground, Modal } from "react-native";
 import { useEffect, useState } from "react";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+
+import appFirebase from "../firebase/credenciales";
 
 const db = getFirestore(appFirebase);
 const storage = getStorage(appFirebase);
 
-export default function ListProvincias({ route, navigation }) {
+export default function ListProvincias({ route }) {
     const { nombreComunidad } = route.params;
     const [provincias, setProvincias] = useState([]);
+    const { currentUser } = useAuth();
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const navigation = useNavigation();
 
     useEffect(() => {
         const getProvincias = async () => {
@@ -20,7 +26,6 @@ export default function ListProvincias({ route, navigation }) {
                 const provinciasSnapshot = await getDocs(provinciasRef);
                 const provinciasData = await Promise.all(provinciasSnapshot.docs.map(async doc => {
                     const provinciaData = doc.data();
-                    // Obtiene la URL de descarga de la imagen de la provincia desde Storage
                     const imagePath = `comunidades/${nombreComunidad}/provincias/${provinciaData.nombre}/${provinciaData.nombre}.jpg`;
                     try {
                         const url = await getDownloadURL(ref(storage, imagePath));
@@ -44,6 +49,18 @@ export default function ListProvincias({ route, navigation }) {
         navigation.navigate("Incidencias", { nombreProvincia, nombreComunidad });
     };
 
+    const handleChatPress = () => {
+        if (!currentUser) {
+            setErrorModalVisible(true);
+            setTimeout(() => {
+                setErrorModalVisible(false);
+                navigation.navigate('Login');
+            }, 2000);
+        } else {
+            navigation.navigate('Chat');
+        }
+    };
+
     return (
         <View style={styles.container}>
             <FlatList
@@ -60,9 +77,22 @@ export default function ListProvincias({ route, navigation }) {
                         </ImageBackground>
                     </TouchableOpacity>
                 )}
-                contentContainerStyle={styles.flatListContainer} // Centra los cards en la pantalla
+                contentContainerStyle={styles.flatListContainer}
             />
-            <TouchableOpacity style={styles.chatButton} onPress={() => navigation.navigate('Chat')}>
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={errorModalVisible}
+                onRequestClose={() => setErrorModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Icon name="exclamation-circle" size={50} color="red" style={styles.errorIcon} />
+                        <Text style={styles.modalText}>Para acceder al chat, primero debes iniciar sesión.</Text>
+                    </View>
+                </View>
+            </Modal>
+            <TouchableOpacity style={styles.chatButton} onPress={handleChatPress}>
                 <Icon name="comments" size={24} color="white" />
             </TouchableOpacity>
             <StatusBar style="auto" />
@@ -76,8 +106,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f0f0',
     },
     flatListContainer: {
-        alignItems: 'center', // Centra horizontalmente los items en la FlatList
-        justifyContent: 'center', // Centra verticalmente los items en la FlatList
+        alignItems: 'center',
+        justifyContent: 'center',
     },
     card: {
         width: '90%',
@@ -86,7 +116,7 @@ const styles = StyleSheet.create({
         borderRadius: 15,
         overflow: 'hidden',
         borderWidth: 3,
-        borderColor: '#18315f', // Cambia el color del borde aquí
+        borderColor: '#18315f',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
@@ -101,7 +131,7 @@ const styles = StyleSheet.create({
     cardText: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#ffff', // Cambia el color del texto aquí
+        color: '#ffff',
         textAlign: 'center',
         textShadowColor: 'rgba(0, 0, 0, 0.75)',
         textShadowOffset: { width: 2, height: 2 },
@@ -117,5 +147,25 @@ const styles = StyleSheet.create({
         elevation: 5,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    modalText: {
+        fontSize: 18,
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    errorIcon: {
+        marginBottom: 10,
     },
 });

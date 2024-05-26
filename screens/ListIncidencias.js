@@ -1,30 +1,36 @@
-import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import appFirebase from "../firebase/credenciales";
-import { getFirestore, collection, onSnapshot, deleteDoc } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+
+import appFirebase from '../firebase/credenciales';
 
 const db = getFirestore(appFirebase);
 
-export default function ListIncidencias({ route, navigation }) {
+export default function ListIncidencias({ route }) {
     const { nombreComunidad, nombreProvincia } = route.params;
     const [incidencias, setIncidencias] = useState([]);
+    const { currentUser } = useAuth();
+    const [errorModalVisible, setErrorModalVisible] = useState(false);
+    const navigation = useNavigation();
 
     useEffect(() => {
         const getIncidencias = async () => {
             try {
-                const incidenciasRef = collection(db, "comunidades", nombreComunidad, "provincias", nombreProvincia, "incidencias");
+                const incidenciasRef = collection(db, 'comunidades', nombreComunidad, 'provincias', nombreProvincia, 'incidencias');
                 const unsubscribe = onSnapshot(incidenciasRef, (snapshot) => {
                     const incidenciasData = snapshot.docs.map(doc => ({
                         id: doc.id,
                         data: doc.data(),
-                        ref: doc.ref // Almacenar la referencia completa del documento
+                        ref: doc.ref
                     }));
                     setIncidencias(incidenciasData);
                 });
                 return () => unsubscribe();
             } catch (error) {
-                console.error("Error fetching incidencias: ", error);
+                console.error('Error fetching incidencias: ', error);
             }
         };
 
@@ -32,19 +38,27 @@ export default function ListIncidencias({ route, navigation }) {
     }, [nombreProvincia, nombreComunidad]);
 
     const handleIncidenciaPress = (incidencia) => {
-        navigation.navigate("Detail", { incidencia });
+        navigation.navigate('Detail', { incidencia });
     };
 
     const handleNewIncidencia = () => {
-        navigation.navigate("New", { nombreComunidad, nombreProvincia });
+        if (currentUser) {
+            navigation.navigate('New', { nombreComunidad, nombreProvincia });
+        } else {
+            setErrorModalVisible(true);
+            setTimeout(() => {
+                setErrorModalVisible(false);
+                navigation.navigate('Login');
+            }, 2000);
+        }
     };
 
     const handleDeleteIncidencia = async (incidencia) => {
         try {
-            await deleteDoc(incidencia.ref); // Usar la referencia almacenada para eliminar la incidencia
-            console.log("Incidencia eliminada con éxito");
+            await deleteDoc(incidencia.ref);
+            console.log('Incidencia eliminada con éxito');
         } catch (error) {
-            console.error("Error deleting incidencia: ", error);
+            console.error('Error deleting incidencia: ', error);
         }
     };
 
@@ -66,6 +80,34 @@ export default function ListIncidencias({ route, navigation }) {
                     </TouchableOpacity>
                 ))}
             </ScrollView>
+
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={errorModalVisible}
+                onRequestClose={() => setErrorModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Icon name="exclamation-circle" size={50} color="red" style={styles.errorIcon} />
+                        <Text style={styles.modalText}>Para acceder al chat, primero debes iniciar sesión.</Text>
+                    </View>
+                </View>
+            </Modal>
+
+            <TouchableOpacity style={styles.chatButton} onPress={() => {
+                if (!currentUser) {
+                    setErrorModalVisible(true);
+                    setTimeout(() => {
+                        setErrorModalVisible(false);
+                        navigation.navigate('Login');
+                    }, 2000);
+                } else {
+                    navigation.navigate('Chat');
+                }
+            }}>
+                <Icon name="comments" size={24} color="white" />
+            </TouchableOpacity>
         </View>
     );
 }
@@ -73,7 +115,7 @@ export default function ListIncidencias({ route, navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f0f0f0", // Fondo gris claro
+        backgroundColor: '#f0f0f0',
     },
     headerContainer: {
         flexDirection: 'row',
@@ -81,66 +123,95 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingTop: 10,
-        backgroundColor: "#ffffff", // Fondo blanco
+        backgroundColor: '#ffffff',
         borderBottomWidth: 3,
-        borderBottomColor: "#18315f", // Cambia el color del borde aquí
+        borderBottomColor: '#18315f',
     },
     title: {
         fontSize: 24,
-        fontWeight: "bold",
-        color: "#18315f", // Texto gris oscuro
+        fontWeight: 'bold',
+        color: '#18315f',
+        marginBottom: 10,
     },
     scrollView: {
-        alignItems: "center",
-        paddingBottom: 20, // Espacio adicional para que el último elemento no quede tapado
+        alignItems: 'center',
+        paddingBottom: 20,
     },
     card: {
-        width: "90%", // Ancho ajustado para evitar que toque los bordes
-        backgroundColor: "#ffffff", // Fondo blanco
+        width: '90%',
+        backgroundColor: '#ffffff',
         padding: 20,
         marginVertical: 10,
         borderRadius: 15,
         elevation: 5,
-        shadowColor: "#000", // Color de sombra negro
-        shadowOpacity: 0.2, // Opacidad de la sombra
-        shadowRadius: 5, // Radio de la sombra
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowRadius: 5,
         shadowOffset: {
             width: 0,
             height: 2,
         },
-        flexDirection: "row", // Alinear el botón de eliminación a la derecha
-        justifyContent: "space-between", // Alinear elementos a los extremos
-        alignItems: "center", // Alinear verticalmente
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         borderWidth: 3,
-        borderColor: "#18315f", // Cambia el color del borde aquí
+        borderColor: '#18315f',
     },
     cardText: {
         fontSize: 18,
-        fontWeight: "bold",
-        textAlign: "center",
-        color: "#333333", // Texto gris oscuro
+        fontWeight: 'bold',
+        textAlign: 'center',
+        color: '#333333',
     },
     deleteButton: {
-        backgroundColor: "#dc3545", // Color de fondo rojo
+        backgroundColor: '#dc3545',
         borderRadius: 10,
         paddingVertical: 8,
         paddingHorizontal: 15,
     },
     deleteButtonText: {
-        color: "#fff", // Texto blanco
+        color: '#fff',
         fontSize: 16,
-        fontWeight: "bold",
+        fontWeight: 'bold',
     },
     addButton: {
-        backgroundColor: "#18315f", // Fondo azul oscuro
-        borderRadius: 25,
-        padding: 10,
+        backgroundColor: '#18315f',
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         justifyContent: 'center',
         alignItems: 'center',
+        marginBottom: 10,
     },
-    addButtonText: {
-        color: "#fff", // Texto blanco
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+    },
+    modalText: {
         fontSize: 18,
-        fontWeight: "bold",
+        textAlign: 'center',
+        marginBottom: 20,
+    },
+    errorIcon: {
+        marginBottom: 10,
+    },
+    chatButton: {
+        position: 'absolute',
+        bottom: 20,
+        right: 20,
+        backgroundColor: '#18315f',
+        borderRadius: 30,
+        padding: 15,
+        elevation: 5,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

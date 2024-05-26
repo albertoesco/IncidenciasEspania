@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
@@ -16,10 +16,27 @@ export default function NewIncidencia({ route }) {
     const [estado, setEstado] = useState('');
     const [fotoSeleccionada, setFotoSeleccionada] = useState(uri);
     const [error, setError] = useState(null);
+    const [errorFoto, setErrorFoto] = useState(null);
+
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalFotoVisible, setModalFotoVisible] = useState(false);
 
     const handleNewIncidencia = async () => {
-        if (!nombre.trim() || !descripcion.trim() || !estado.trim() || !uri.trim()) {
+        if (!nombre.trim() || !descripcion.trim() || !estado.trim()) {
             setError('Por favor ingrese todos los campos');
+            setModalVisible(true);
+            setTimeout(() => {
+                setModalVisible(false);
+            }, 3000);
+            return;
+        }
+
+        if (!uri.trim()) {
+            setErrorFoto('Por favor seleccione una foto');
+            setModalFotoVisible(true);
+            setTimeout(() => {
+                setModalFotoVisible(false);
+            }, 3000);
             return;
         }
 
@@ -35,7 +52,9 @@ export default function NewIncidencia({ route }) {
                 uri: uri
             });
             navigation.goBack();
-            setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada, uri: uri }]);
+            if (setIncidencias) {
+                setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada, uri: uri }]);
+            }
         } catch (e) {
             console.error('Error al crear incidencia:', e.message, e.stack);
         }
@@ -44,7 +63,9 @@ export default function NewIncidencia({ route }) {
     return (
         <ScrollView contentContainerStyle={styles.scrollView}>
             <View style={styles.container}>
-                <Text style={styles.title}>Nueva Incidencia en {nombreProvincia}</Text>
+                <View style={styles.titleContainer}>
+                    <Text style={styles.title}>Nueva Incidencia en {nombreProvincia}</Text>
+                </View>
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>Nombre:</Text>
                     <TextInput
@@ -71,8 +92,12 @@ export default function NewIncidencia({ route }) {
                     />
                 </View>
                 <View style={styles.buttonContainer}>
-                    <Button title="Abrir Galería" onPress={() => navigation.navigate('Galeria', {nombreComunidad, nombreProvincia})} color="#3F51B5" />
-                    <Button title="Crear Incidencia" onPress={handleNewIncidencia} color="#3F51B5" />
+                    <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Galeria', { nombreComunidad, nombreProvincia })}>
+                        <Text style={styles.buttonText}>Seleccionar Imagen</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={handleNewIncidencia}>
+                        <Text style={styles.buttonText}>Crear Incidencia</Text>
+                    </TouchableOpacity>
                 </View>
                 {fotoSeleccionada && (
                     <View style={styles.imageContainer}>
@@ -80,12 +105,32 @@ export default function NewIncidencia({ route }) {
                         <Image source={{ uri: fotoSeleccionada }} style={styles.image} />
                     </View>
                 )}
-                {error && (
-                    <View style={styles.errorContainer}>
-                        <Icon name="error" size={24} color="#E53935" />
-                        <Text style={styles.errorMessage}>{error}</Text>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                >
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Icon name="error" size={24} color="#FF0000" />
+                            <Text style={styles.modalText}>{error}</Text>
+                        </View>
                     </View>
-                )}
+                </Modal>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalFotoVisible}
+                    onRequestClose={() => setModalFotoVisible(false)}
+                >
+                    <View style={styles.modalContainer}>
+                        <View style={styles.modalContent}>
+                            <Icon name="error" size={24} color="#FF0000" />
+                            <Text style={styles.modalText}>{errorFoto}</Text>
+                        </View>
+                    </View>
+                </Modal>
             </View>
         </ScrollView>
     );
@@ -100,12 +145,18 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#fff',
     },
+    titleContainer: {
+        width: '100%',
+        marginBottom: 20,
+        borderBottomWidth: 3,
+        borderBottomColor: '#18315f',
+        paddingBottom: 10,
+    },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 20,
         textAlign: 'center',
-        color: '#3F51B5',
+        color: '#18315f',
     },
     inputContainer: {
         marginBottom: 20,
@@ -130,6 +181,18 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
+    button: {
+        backgroundColor: '#3F51B5',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
     imageContainer: {
         alignItems: 'center',
         marginTop: 20,
@@ -140,13 +203,24 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
         marginTop: 10,
     },
-    errorContainer: {
-        flexDirection: 'row',
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 10,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
-    errorMessage: {
-        color: '#E53935',
-        marginLeft: 5,
+    modalContent: {
+        width: 300,
+        backgroundColor: '#fff',
+        padding: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    modalText: {
+        fontSize: 18,
+        color: '#FF0000',
+        textAlign: 'center',
+        marginTop: 10,
     },
 });

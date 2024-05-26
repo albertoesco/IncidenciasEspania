@@ -7,8 +7,8 @@ import { MaterialIndicator } from 'react-native-indicators';
 export default function PantallaCarga({ navigation }) {
     useEffect(() => {
         const timer = setTimeout(() => {
-            navigation.replace('Comunidades'); // Reemplaza 'Comunidades' con la pantalla que desees cargar después
-        }, Math.random() * 5000 + 5000); // Carga entre 5 y 10 segundos
+            navigation.replace('Comunidades');
+        }, Math.random() * 5000 + 5000);
 
         return () => clearTimeout(timer);
     }, [navigation]);
@@ -19,10 +19,10 @@ export default function PantallaCarga({ navigation }) {
             style={styles.container}
         >
             <Animatable.Image
-                animation="pulse" // Cambia la animación a 'pulse'
+                animation="pulse"
                 easing="ease-out"
                 iterationCount="infinite"
-                duration={1500} // Duración de cada pulso
+                duration={1500}
                 source={require('../assets/In.png')}
                 style={styles.logo}
                 resizeMode="contain"

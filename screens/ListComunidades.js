@@ -1,13 +1,14 @@
 import * as React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Animated, Easing } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { createStackNavigator } from '@react-navigation/stack';
-import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import appFirebase from '../firebase/credenciales';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { getStorage, ref, getDownloadURL } from 'firebase/storage';
+import { useAuth } from '../context/AuthContext';
+import Modal from 'react-native-modal';
+import { useNavigation } from '@react-navigation/native';
 
 const db = getFirestore(appFirebase);
 const storage = getStorage(appFirebase);
@@ -15,25 +16,23 @@ const storage = getStorage(appFirebase);
 export default function ListComunidades(props) {
   const [lista, setLista] = useState([]);
   const [imagenes, setImagenes] = useState({});
-  const [userLoggedIn, setUserLoggedIn] = useState(false); // Estado para saber si el usuario está registrado
-  const scaleValue = new Animated.Value(1); // Valor inicial para la animación de escala
-
-  // Agrega un nuevo Animated.Value para controlar la animación de rotación
+  const scaleValue = new Animated.Value(1);
   const rotateValue = new Animated.Value(0);
+  const { currentUser } = useAuth();
+  const [modalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation();
 
   useEffect(() => {
-    // Inicia la animación de rotación cuando el componente se monta
     Animated.loop(
       Animated.timing(rotateValue, {
         toValue: 1,
-        duration: 2000, // Duración de la animación en milisegundos
+        duration: 2000,
         easing: Easing.linear,
         useNativeDriver: true,
       })
     ).start();
   }, []);
 
-  // Calcula la rotación basada en el valor de rotación
   const spin = rotateValue.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
@@ -63,9 +62,9 @@ export default function ListComunidades(props) {
     const obtenerImagenes = async () => {
       const imagenes = {};
       for (const comunidad of lista) {
-        const imagePath = `comunidades/${comunidad.nombre}/${comunidad.nombre}.jpg`; // Ruta de la imagen en el almacenamiento
+        const imagePath = `comunidades/${comunidad.nombre}/${comunidad.nombre}.jpg`;
         try {
-          const url = await getDownloadURL(ref(storage, imagePath)); // Obtiene la URL de descarga de la imagen
+          const url = await getDownloadURL(ref(storage, imagePath));
           imagenes[comunidad.idcomunidad] = url;
         } catch (error) {
           console.error(`Error al obtener la imagen de ${comunidad.nombre}:`, error);
@@ -76,19 +75,11 @@ export default function ListComunidades(props) {
     obtenerImagenes();
   }, [lista]);
 
-  // Función para manejar el inicio de sesión o cierre de sesión
   const handleLogin = () => {
-    if (userLoggedIn) {
-      // Cerrar sesión
-      // Aquí deberías agregar la lógica para cerrar sesión
-    } else {
-      // Iniciar sesión
-      props.navigation.navigate('Login');
-    }
+    navigation.navigate('Login');
   };
 
   const handleButtonPressIn = () => {
-    // Animación de pulsación hacia adentro
     Animated.spring(scaleValue, {
       toValue: 0.9,
       useNativeDriver: true,
@@ -96,13 +87,24 @@ export default function ListComunidades(props) {
   };
 
   const handleButtonPressOut = () => {
-    // Animación de liberación de la pulsación
     Animated.spring(scaleValue, {
       toValue: 1,
       friction: 4,
       tension: 40,
       useNativeDriver: true,
     }).start();
+  };
+
+  const openChat = () => {
+    if (!currentUser) {
+      setModalVisible(true);
+      setTimeout(() => {
+        setModalVisible(false);
+        navigation.navigate('Login');
+      }, 2000);
+    } else {
+      props.navigation.navigate('Chat');
+    }
   };
 
   return (
@@ -132,12 +134,16 @@ export default function ListComunidades(props) {
         onPressOut={handleButtonPressOut}
       >
         <Animated.View style={[styles.buttonContent, { transform: [{ scale: scaleValue }, { rotate: spin }] }]}>
-          <Icon name={userLoggedIn ? 'sign-out' : 'sign-in'} size={24} color="white" />
+          {currentUser ? (
+            <Icon name="sign-out" size={24} color="white" />
+          ) : (
+            <Icon name="user-circle" size={24} color="white" />
+          )}
         </Animated.View>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.chatButton}
-        onPress={() => props.navigation.navigate('Chat')}
+        onPress={openChat}
         onPressIn={handleButtonPressIn}
         onPressOut={handleButtonPressOut}
       >
@@ -146,6 +152,13 @@ export default function ListComunidades(props) {
         </Animated.View>
       </TouchableOpacity>
       <StatusBar style="auto" />
+
+      <Modal isVisible={modalVisible}>
+        <View style={styles.modalContent}>
+          <Icon name="exclamation-circle" size={50} color="red" />
+          <Text style={styles.modalText}>Debe iniciar sesión para acceder al chat</Text>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -153,14 +166,14 @@ export default function ListComunidades(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f0f0', // Fondo gris claro
+    backgroundColor: '#f0f0f0',
   },
   scrollView: {
-    alignItems: 'center', // Centra verticalmente las tarjetas
+    alignItems: 'center',
   },
   card: {
     width: '90%',
-    backgroundColor: '#ffffff', // Blanco
+    backgroundColor: '#ffffff',
     padding: 20,
     marginVertical: 10,
     borderRadius: 50,
@@ -169,8 +182,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     elevation: 5,
     borderWidth: 3,
-    borderColor: '#18315f', // Nuevo color de borde
-    shadowColor: '#000', // Color de sombra
+    borderColor: '#18315f',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
@@ -179,19 +192,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#18315f', // Nuevo color de texto para las comunidades
+    color: '#18315f',
   },
   flagImage: {
-    width: 40, // Ajustar el ancho de la imagen según sea necesario
-    height: 30, // Ajustar la altura de la imagen según sea necesario
-    marginRight: 20, // Espacio entre la imagen de la bandera y el texto
+    width: 40,
+    height: 30,
+    marginRight: 20,
     borderRadius: 5,
   },
   chatButton: {
     position: 'absolute',
     bottom: 20,
     right: 20,
-    backgroundColor: '#18315f', // Azul
+    backgroundColor: '#18315f',
     borderRadius: 30,
     padding: 15,
     elevation: 5,
@@ -201,12 +214,27 @@ const styles = StyleSheet.create({
   loginButton: {
     position: 'absolute',
     top: 20,
-    right: 20, // Ajusta la posición a la derecha
-    backgroundColor: '#737373', // Rojo
+    right: 20,
+    backgroundColor: '#737373',
     borderRadius: 30,
     padding: 15,
     elevation: 5,
     alignItems: 'center',
-    marginTop: 10, // Ajusta el margen superior para separar del contenido
+    marginTop: 10,
+  },
+  buttonContent: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    marginVertical: 10,
+    textAlign: 'center',
   },
 });

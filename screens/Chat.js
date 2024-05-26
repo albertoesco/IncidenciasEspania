@@ -3,7 +3,7 @@ import { View, Text, Button, StyleSheet } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 import { collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { db } from '../firebase/credenciales'; // Importa la instancia de Firebase Firestore
+import { db } from '../firebase/credenciales';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -18,7 +18,7 @@ export default function Chat() {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        setUsername(currentUser.email.split('@')[0]);  // Obtener la parte antes del '@' del correo electrónico
+        setUsername(currentUser.email.split('@')[0]);
       } else {
         setUser(null);
         setUsername('');
@@ -32,10 +32,10 @@ export default function Chat() {
         return {
           _id: doc.id,
           text: data.texto,
-          createdAt: data.fecha ? data.fecha.toDate() : new Date(), // Verifica si fecha es null
+          createdAt: data.fecha ? data.fecha.toDate() : new Date(),
           user: {
             _id: data.usuario,
-            name: data.usuario_nombre || '', // Verifica si usuario_nombre está presente
+            name: data.usuario_nombre || '',
           },
         };
       });
@@ -50,7 +50,7 @@ export default function Chat() {
 
   const onSend = async (newMessages = []) => {
     if (!user) {
-      setModalVisible(true); // Muestra el modal de error
+      setModalVisible(true);
       return;
     }
     const message = newMessages[0];
@@ -58,8 +58,8 @@ export default function Chat() {
       await addDoc(collection(db, "mensajes"), {
         texto: message.text,
         usuario: user.uid,
-        usuario_nombre: username,  // Agregar el nombre del usuario al mensaje
-        fecha: serverTimestamp(), // Guarda la marca de tiempo actual
+        usuario_nombre: username,
+        fecha: serverTimestamp(),
       });
     } catch (error) {
       console.error("Error al enviar el mensaje:", error);
