@@ -1,4 +1,3 @@
-// PantallaCarga.js
 import React, { useEffect } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 import * as Animatable from 'react-native-animatable';
@@ -16,25 +15,33 @@ export default function PantallaCarga({ navigation }) {
 
     return (
         <LinearGradient
-            colors={['#fffc00', '#ffcc00']}
+            colors={['#e0eafc', '#cfdef3', '#18315f']}
             style={styles.container}
         >
             <Animatable.Image
-                animation="bounceIn"
-                duration={2000}
-                source={require('../assets/splash.png')} // Asegúrate de tener un logo en tu carpeta de assets
+                animation="pulse" // Cambia la animación a 'pulse'
+                easing="ease-out"
+                iterationCount="infinite"
+                duration={1500} // Duración de cada pulso
+                source={require('../assets/In.png')}
                 style={styles.logo}
                 resizeMode="contain"
             />
             <Animatable.Text 
-                animation="pulse" 
-                easing="ease-out" 
+                animation="fadeInDown" 
+                duration={2000} 
                 iterationCount="infinite" 
                 style={styles.loadingText}
             >
                 Cargando...
             </Animatable.Text>
-            <MaterialIndicator color="#ad1519" size={60} />
+            <Animatable.View 
+                animation="fadeIn" 
+                duration={2000} 
+                style={styles.indicatorContainer}
+            >
+                <MaterialIndicator color="#ffffff" size={60} />
+            </Animatable.View>
         </LinearGradient>
     );
 }
@@ -44,16 +51,22 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        margin: 0,
+        padding: 0,
     },
     logo: {
-        width: 200,
-        height: 200,
-        marginBottom: 20,
+        width: 350,
+        height: 350, 
+        marginTop: 300,
     },
     loadingText: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#ad1519', // Texto rojo oscuro
-        marginBottom: 20,
+        color: '#18315f',
+        marginBottom: 0,
+    },
+    indicatorContainer: {
+        marginTop: 0,
+        marginBottom: 400,
     },
 });

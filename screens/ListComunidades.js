@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     right: 20, // Ajusta la posición a la derecha
-    backgroundColor: '#FF3B30', // Rojo
+    backgroundColor: '#737373', // Rojo
     borderRadius: 30,
     padding: 15,
     elevation: 5,

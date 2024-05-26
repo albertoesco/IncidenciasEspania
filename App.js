@@ -40,12 +40,13 @@ export default function App() {
           headerTitleAlign: 'center', // Centrar el título en el header
           headerRight: () => (
             <Image
-              source={require('./assets/splash.png')} // Ruta de la imagen del logo
+              source={require('./assets/In.png')} // Ruta de la imagen del logo
               style={styles.logo}
             />
           ),
           headerRightContainerStyle: {
-            marginRight: 10, // Ajustar el margen derecho del logo
+            marginRight: 0, // Ajustar el margen derecho del logo
+            paddingRight: 10, // Añadir algo de padding a la derecha
           },
         }}
       >
@@ -114,8 +115,8 @@ export default function App() {
 
 const styles = StyleSheet.create({
   logo: {
-    width: 120, // Ancho deseado del logo
-    height: 40, // Alto deseado del logo
+    width: 100, // Ajustar el ancho del logo
+    height: 100, // Ajustar el alto del logo
     resizeMode: 'contain', // Ajuste de la imagen
   },
 });
