@@ -8,46 +8,38 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
 import * as Animatable from 'react-native-animatable';
 
+// Inicializar Firestore y Storage con las credenciales de Firebase
 const db = getFirestore(appFirebase);
 const storage = getStorage(appFirebase);
 
 export default function NewIncidencia({ route }) {
+    // Obtener parámetros de la ruta
     const { nombreComunidad, nombreProvincia, uri, setIncidencias } = route.params;
     const navigation = useNavigation();
 
+    // Definir estados para manejar el formulario y las interacciones del usuario
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [estado, setEstado] = useState('Pendiente');
     const [fotoSeleccionada, setFotoSeleccionada] = useState(uri);
     const [error, setError] = useState(null);
-    const [errorFoto, setErrorFoto] = useState(null);
-
     const [modalVisible, setModalVisible] = useState(false);
-    const [modalFotoVisible, setModalFotoVisible] = useState(false);
 
-    
+    // Función para manejar la creación de una nueva incidencia
     const handleNewIncidencia = async () => {
-        if (!nombre.trim() || !descripcion.trim() || !estado.trim()) {
-            setError('Por favor ingrese todos los campos');
+        // Validar que los campos del formulario no estén vacíos
+        if (!nombre.trim() || !descripcion.trim() || !estado.trim() || !uri.trim()) {
+            setError('Por favor ingrese todos los campos, incluyendo la foto');
             setModalVisible(true);
             setTimeout(() => {
                 setModalVisible(false);
             }, 3000);
             return;
         }
-    
-        if (!uri.trim()) {
-            setErrorFoto('Por favor seleccione una foto');
-            setModalFotoVisible(true);
-            setTimeout(() => {
-                setModalFotoVisible(false);
-            }, 3000);
-            return;
-        }
-    
+
         const fechaActual = new Date();
         const fechaFormateada = fechaActual.toISOString();
-    
+
         try {
             // Subir imagen a Firebase Storage
             const response = await fetch(uri);
@@ -55,10 +47,10 @@ export default function NewIncidencia({ route }) {
             const storagePath = `comunidades/${nombreComunidad}/provincias/${nombreProvincia}/incidencias/${fechaFormateada}_${nombreComunidad}_${nombreProvincia}.jpg`;
             const storageRef = ref(storage, storagePath);
             await uploadBytes(storageRef, blob);
-    
+
             // Obtener URL de descarga de la imagen
             const downloadURL = await getDownloadURL(storageRef);
-    
+
             // Crear documento de la incidencia en Firestore con la URL de la imagen
             await addDoc(collection(db, 'comunidades', nombreComunidad, 'provincias', nombreProvincia, 'incidencias'), {
                 nombre: nombre,
@@ -67,7 +59,8 @@ export default function NewIncidencia({ route }) {
                 fecha: fechaFormateada,
                 uri: downloadURL  // Usar la URL de descarga
             });
-    
+
+            // Navegar de regreso y actualizar la lista de incidencias si es necesario
             navigation.goBack();
             if (setIncidencias) {
                 setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada, uri: downloadURL }]);
@@ -141,24 +134,12 @@ export default function NewIncidencia({ route }) {
                         </View>
                     </View>
                 </Modal>
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalFotoVisible}
-                    onRequestClose={() => setModalFotoVisible(false)}
-                >
-                    <View style={styles.modalContainer}>
-                        <View style={styles.modalContent}>
-                            <Icon name="error" size={24} color="#FF0000" />
-                            <Text style={styles.modalText}>{errorFoto}</Text>
-                        </View>
-                    </View>
-                </Modal>
             </View>
         </ScrollView>
     );
 }
 
+// Estilos para el componente
 const styles = StyleSheet.create({
     scrollView: {
         flexGrow: 1,

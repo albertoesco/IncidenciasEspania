@@ -1,3 +1,4 @@
+// Importaciones necesarias
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Easing } from 'react-native';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
@@ -7,7 +8,9 @@ import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../context/AuthContext';
 
+// Componente principal de Login
 export default function Login() {
+    // Estados para manejar email, contraseña, visibilidad del modal, mensaje del modal y tipo de modal
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isModalVisible, setModalVisible] = useState(false);
@@ -17,16 +20,18 @@ export default function Login() {
     const { currentUser } = useAuth();
     const spinValue = new Animated.Value(0);
 
+    // Manejar cambios en los inputs de email y contraseña
     const handleEmailChange = (text) => setEmail(text);
     const handlePasswordChange = (text) => setPassword(text);
 
+    // Validar inputs de email y contraseña
     const validateInput = () => {
         if (!email || !password) {
             showModal('Por favor ingrese email y contraseña', 'error');
             return false;
         }
         if (!email.includes('@') || !email.includes('.')) {
-            showModal('Email inválido', 'error');
+            showModal('Email inválido "@"', 'error');
             return false;
         }
         if (password.length < 8) {
@@ -36,6 +41,7 @@ export default function Login() {
         return true;
     };
 
+    // Mostrar modal con mensaje y tipo (error o success)
     const showModal = (message, type) => {
         setModalMessage(message);
         setModalType(type);
@@ -55,10 +61,12 @@ export default function Login() {
         setTimeout(hideModal, 2000);
     };
 
+    // Ocultar modal
     const hideModal = () => {
         setModalVisible(false);
     };
 
+    // Manejar inicio de sesión
     const handleSignInOrSignUp = async () => {
         if (!validateInput()) return;
         if (currentUser) {
@@ -77,6 +85,7 @@ export default function Login() {
         }
     };
 
+    // Manejar registro
     const handleSignUp = async () => {
         if (!validateInput()) return;
         if (currentUser) {
@@ -95,6 +104,7 @@ export default function Login() {
         }
     };
 
+    // Manejar cierre de sesión
     const handleSignOut = async () => {
         if (!currentUser) {
             showModal('No hay ningún usuario en este momento. Por favor, inicie sesión.', 'error');
@@ -152,6 +162,7 @@ export default function Login() {
     );
 }
 
+// Estilos para el componente
 const styles = StyleSheet.create({
     container: {
         flex: 1,

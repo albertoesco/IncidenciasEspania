@@ -3,12 +3,15 @@ import { Button, Image, View, StyleSheet, Text, TouchableOpacity } from 'react-n
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
+// Componente principal de la galería
 export default function Galeria({ route, navigation }) {
+  // Estados para manejar la imagen, la cámara (frontal/trasera) y los permisos
   const [image, setImage] = useState(null);
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
   const { nombreComunidad, nombreProvincia } = route.params;
 
+  // Función para seleccionar una imagen de la galería
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -17,38 +20,37 @@ export default function Galeria({ route, navigation }) {
       quality: 1,
     });
 
-    console.log(result);
-    console.log("estoy en galeria", nombreComunidad, nombreProvincia)
     if (!result.cancelled) {
       navigation.navigate('New', { uri: result.assets[0].uri, nombreComunidad, nombreProvincia });
     }
   };
 
+  // Función para tomar una foto con la cámara
   const takePhoto = async () => {
     let { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
       alert('Se requieren permisos de cámara para tomar una foto.');
       return;
     }
-  
+
     let result = await ImagePicker.launchCameraAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
-  
-    console.log(result);
-  
+
     if (!result.cancelled) {
       navigation.navigate('New', { uri: result.assets[0].uri, nombreComunidad, nombreProvincia });
     }
   };
-  
+
+  // Función para cambiar entre la cámara frontal y trasera
   const toggleCameraFacing = () => {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   };
 
+  // Manejo de permisos: si no hay permisos, muestra una vista vacía o un mensaje para solicitarlos
   if (!permission) {
     return <View />;
   }
@@ -62,6 +64,7 @@ export default function Galeria({ route, navigation }) {
     );
   }
 
+  // Renderiza la vista principal con botones para tomar foto, abrir galería y cambiar cámara
   return (
     <View style={styles.container}>
       <View style={styles.buttonContainer}>
@@ -81,6 +84,7 @@ export default function Galeria({ route, navigation }) {
   );
 }
 
+// Estilos para el componente
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -96,7 +100,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: 10,
     paddingVertical: 10,
-    backgroundColor: '#18315f'
+    backgroundColor: '#18315f',
   },
   text: {
     fontSize: 16,

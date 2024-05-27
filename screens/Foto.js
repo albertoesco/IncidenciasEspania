@@ -1,17 +1,24 @@
+// Importaciones necesarias de React, React Native y Expo
 import React, { useState, useRef } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
 
+// Componente principal para tomar fotos
 export default function Foto({ route }) {
+  // Estado para la cámara frontal o trasera
   const [facing, setFacing] = useState('back');
+  // Permisos de la cámara
   const [permission, requestPermission] = useCameraPermissions();
+  // Referencia a la cámara
   const cameraRef = useRef(null);
 
+  // Si no se han solicitado los permisos, mostrar una vista vacía
   if (!permission) {
     return <View />;
   }
 
+  // Si los permisos no han sido concedidos, mostrar un mensaje y un botón para solicitarlos
   if (!permission.granted) {
     return (
       <View style={styles.container}>
@@ -21,24 +28,28 @@ export default function Foto({ route }) {
     );
   }
 
+  // Obtener los parámetros pasados a este componente
   const { nombreComunidad, nombreProvincia } = route.params;
 
   console.log("Nombre de la Comunidad:", nombreComunidad);
   console.log("Nombre de la Provincia:", nombreProvincia);
 
+  // Función para alternar entre la cámara frontal y trasera
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
 
+  // Función para tomar una foto
   async function takePicture() {
     if (cameraRef.current) {
-      const options = { quality: 1 };
+      const options = { quality: 1 }; // Opciones de calidad de la foto
       const photo = await cameraRef.current.takePictureAsync(options);
-      savePhotoToGallery(photo.uri);
+      savePhotoToGallery(photo.uri); // Guardar la foto en la galería
       console.log("Picture taken!");
     }
   }
 
+  // Función para guardar la foto en la galería
   async function savePhotoToGallery(uri) {
     try {
       await MediaLibrary.saveToLibraryAsync(uri);
@@ -48,6 +59,7 @@ export default function Foto({ route }) {
     }
   }
 
+  // Renderizar el componente
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} ref={cameraRef} facing={facing}>
@@ -64,6 +76,7 @@ export default function Foto({ route }) {
   );
 }
 
+// Estilos para el componente
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -1,3 +1,4 @@
+// Importaciones necesarias
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, ImageBackground, Modal } from "react-native";
 import { useEffect, useState } from "react";
@@ -6,12 +7,13 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
-
 import appFirebase from "../firebase/credenciales";
 
+// Inicialización de Firestore y Storage
 const db = getFirestore(appFirebase);
 const storage = getStorage(appFirebase);
 
+// Componente principal para listar provincias
 export default function ListProvincias({ route }) {
     const { nombreComunidad } = route.params;
     const [provincias, setProvincias] = useState([]);
@@ -19,6 +21,7 @@ export default function ListProvincias({ route }) {
     const [errorModalVisible, setErrorModalVisible] = useState(false);
     const navigation = useNavigation();
 
+    // Efecto para obtener las provincias de Firestore
     useEffect(() => {
         const getProvincias = async () => {
             try {
@@ -45,10 +48,12 @@ export default function ListProvincias({ route }) {
         getProvincias();
     }, [nombreComunidad]);
 
+    // Función para manejar la presión de una provincia
     const handleProvinciaPress = (nombreProvincia) => {
         navigation.navigate("Incidencias", { nombreProvincia, nombreComunidad });
     };
 
+    // Función para manejar la presión del botón de chat
     const handleChatPress = () => {
         if (!currentUser) {
             setErrorModalVisible(true);
@@ -100,6 +105,7 @@ export default function ListProvincias({ route }) {
     );
 }
 
+// Estilos para el componente
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -131,7 +137,7 @@ const styles = StyleSheet.create({
     cardText: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#ffff',
+        color: '#fff',
         textAlign: 'center',
         textShadowColor: 'rgba(0, 0, 0, 0.75)',
         textShadowOffset: { width: 2, height: 2 },

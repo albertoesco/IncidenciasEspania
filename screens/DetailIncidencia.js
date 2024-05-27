@@ -1,3 +1,4 @@
+// Importaciones necesarias de React, React Native, Firebase y otros
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import React, { useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity, Modal, Image, Alert } from "react-native";
@@ -6,18 +7,22 @@ import appFirebase from "../firebase/credenciales";
 import { getFirestore, updateDoc } from "firebase/firestore";
 import { Picker } from '@react-native-picker/picker';
 
+// Obtener instancia de Firestore
 const db = getFirestore(appFirebase);
 
+// Componente principal que muestra el detalle de una incidencia
 export default function DetailIncidencia({ route }) {
-  const { incidencia, nombreProvincia } = route.params;
-  const [editing, setEditing] = useState(false);
-  const [newEstado, setNewEstado] = useState(incidencia.data.estado);
-  const [modalVisible, setModalVisible] = useState(false);
+  const { incidencia, nombreProvincia } = route.params; // Obtener los parámetros pasados a este componente
+  const [editing, setEditing] = useState(false); // Estado para determinar si se está editando el estado
+  const [newEstado, setNewEstado] = useState(incidencia.data.estado); // Estado para el nuevo estado de la incidencia
+  const [modalVisible, setModalVisible] = useState(false); // Estado para controlar la visibilidad del modal
 
+  // Función para activar el modo de edición del estado
   const handleEditEstado = () => {
     setEditing(true);
   };
 
+  // Función para guardar el nuevo estado en Firestore
   const handleSaveEstado = async () => {
     if (!newEstado.trim()) {
       Alert.alert("Error", "El estado no puede estar vacío.");
@@ -34,7 +39,7 @@ export default function DetailIncidencia({ route }) {
         setModalVisible(true);
         setTimeout(() => {
           setModalVisible(false);
-        }, 2000); 
+        }, 2000); // Ocultar modal después de 2 segundos
       } else {
         console.error("Referencia del documento no válida:", incidencia.ref);
         Alert.alert("Error", "Referencia del documento no válida.");
@@ -45,6 +50,7 @@ export default function DetailIncidencia({ route }) {
     }
   };
 
+  // Renderizar el componente de detalle de incidencia
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Detalle de Incidencia ({incidencia.data.nombre})</Text>
@@ -90,8 +96,8 @@ export default function DetailIncidencia({ route }) {
         )}
       </View>
       {incidencia.data.uri && (
-    <Image source={{ uri: incidencia.data.uri }} style={styles.image} /> 
-)}
+        <Image source={{ uri: incidencia.data.uri }} style={styles.image} /> 
+      )}
       <Modal
         animationType="slide"
         transparent={true}
@@ -109,6 +115,7 @@ export default function DetailIncidencia({ route }) {
   );
 }
 
+// Estilos para el componente
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -175,16 +182,6 @@ const styles = StyleSheet.create({
   editContainer: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  editInput: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#18315f",
-    borderRadius: 10,
-    padding: 10,
-    marginRight: 10,
-    color: "#18315f",
-    backgroundColor: "#fff",
   },
   saveButton: {
     backgroundColor: "#18315f",

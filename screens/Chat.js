@@ -1,3 +1,4 @@
+// Importaciones necesarias de React, React Native y Firebase
 import React, { useState, useEffect } from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
@@ -7,25 +8,33 @@ import { db } from '../firebase/credenciales';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+// Componente principal de Chat
 export default function Chat() {
+  // Definición de estados
   const [messages, setMessages] = useState([]);
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [isModalVisible, setModalVisible] = useState(false);
 
+  // useEffect para la autenticación del usuario y suscripción a los mensajes
   useEffect(() => {
     const auth = getAuth();
+
+    // Escuchar cambios en la autenticación del usuario
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        setUsername(currentUser.email.split('@')[0]);
+        setUsername(currentUser.email.split('@')[0]); // Extrae el nombre de usuario del email
       } else {
         setUser(null);
         setUsername('');
       }
     });
 
+    // Consulta para ordenar los mensajes por fecha en orden descendente
     const q = query(collection(db, "mensajes"), orderBy("fecha", "desc"));
+
+    // Suscribirse a los cambios en la colección de mensajes
     const unsubscribeMessages = onSnapshot(q, (snapshot) => {
       const messagesData = snapshot.docs.map((doc) => {
         const data = doc.data();
@@ -39,18 +48,20 @@ export default function Chat() {
           },
         };
       });
-      setMessages(messagesData);
+      setMessages(messagesData); // Actualiza el estado de los mensajes
     });
 
+    // Limpiar suscripciones cuando el componente se desmonte
     return () => {
       unsubscribeAuth();
       unsubscribeMessages();
     };
   }, []);
 
+  // Función para enviar un nuevo mensaje
   const onSend = async (newMessages = []) => {
     if (!user) {
-      setModalVisible(true);
+      setModalVisible(true); // Mostrar modal si no hay usuario autenticado
       return;
     }
     const message = newMessages[0];
@@ -66,13 +77,19 @@ export default function Chat() {
     }
   };
 
+  // Función para cerrar el modal
   const closeModal = () => {
     setModalVisible(false);
   };
 
+  // Renderizar el componente de chat
   return (
     <View style={{ flex: 1 }}>
-      <GiftedChat messages={messages} onSend={onSend} user={user ? { _id: user.uid, name: username } : null} />
+      <GiftedChat
+        messages={messages}
+        onSend={onSend}
+        user={user ? { _id: user.uid, name: username } : null}
+      />
       <Modal isVisible={isModalVisible}>
         <View style={styles.modalContent}>
           <Icon name="error" size={50} color="red" />
@@ -84,6 +101,7 @@ export default function Chat() {
   );
 }
 
+// Estilos para el modal
 const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: 'white',

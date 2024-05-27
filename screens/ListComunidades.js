@@ -1,3 +1,4 @@
+// Importaciones necesarias de React, React Native y Expo
 import * as React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Animated, Easing } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
@@ -10,18 +11,21 @@ import { useAuth } from '../context/AuthContext';
 import Modal from 'react-native-modal';
 import { useNavigation } from '@react-navigation/native';
 
+// Inicializar Firestore y Storage de Firebase
 const db = getFirestore(appFirebase);
 const storage = getStorage(appFirebase);
 
+// Componente principal para listar las comunidades
 export default function ListComunidades(props) {
-  const [lista, setLista] = useState([]);
-  const [imagenes, setImagenes] = useState({});
-  const scaleValue = new Animated.Value(1);
-  const rotateValue = new Animated.Value(0);
-  const { currentUser } = useAuth();
-  const [modalVisible, setModalVisible] = useState(false);
-  const navigation = useNavigation();
+  const [lista, setLista] = useState([]); // Estado para almacenar la lista de comunidades
+  const [imagenes, setImagenes] = useState({}); // Estado para almacenar las URLs de las imágenes de las comunidades
+  const scaleValue = new Animated.Value(1); // Valor de animación para escala
+  const rotateValue = new Animated.Value(0); // Valor de animación para rotación
+  const { currentUser } = useAuth(); // Estado del usuario autenticado
+  const [modalVisible, setModalVisible] = useState(false); // Estado para controlar la visibilidad del modal
+  const navigation = useNavigation(); // Hook para la navegación
 
+  // Efecto para la animación de rotación
   useEffect(() => {
     Animated.loop(
       Animated.timing(rotateValue, {
@@ -33,11 +37,13 @@ export default function ListComunidades(props) {
     ).start();
   }, []);
 
+  // Interpolación de la animación de rotación
   const spin = rotateValue.interpolate({
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
 
+  // Efecto para obtener la lista de comunidades de Firestore
   useEffect(() => {
     const getLista = async () => {
       try {
@@ -58,6 +64,7 @@ export default function ListComunidades(props) {
     getLista();
   }, []);
 
+  // Efecto para obtener las URLs de las imágenes de las comunidades de Firebase Storage
   useEffect(() => {
     const obtenerImagenes = async () => {
       const imagenes = {};
@@ -75,10 +82,12 @@ export default function ListComunidades(props) {
     obtenerImagenes();
   }, [lista]);
 
+  // Función para manejar el login
   const handleLogin = () => {
     navigation.navigate('Login');
   };
 
+  // Funciones para manejar la animación de presión de botones
   const handleButtonPressIn = () => {
     Animated.spring(scaleValue, {
       toValue: 0.9,
@@ -95,6 +104,7 @@ export default function ListComunidades(props) {
     }).start();
   };
 
+  // Función para abrir el chat, mostrando el modal si no está autenticado
   const openChat = () => {
     if (!currentUser) {
       setModalVisible(true);
@@ -107,6 +117,7 @@ export default function ListComunidades(props) {
     }
   };
 
+  // Renderizar el componente
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
@@ -114,9 +125,7 @@ export default function ListComunidades(props) {
           <TouchableOpacity
             key={index}
             style={styles.card}
-            onPress={() =>
-              props.navigation.navigate('Provincias', { nombreComunidad: list.nombre })
-            }
+            onPress={() => props.navigation.navigate('Provincias', { nombreComunidad: list.nombre })}
             onPressIn={handleButtonPressIn}
             onPressOut={handleButtonPressOut}
           >
@@ -163,6 +172,7 @@ export default function ListComunidades(props) {
   );
 }
 
+// Estilos para el componente
 const styles = StyleSheet.create({
   container: {
     flex: 1,

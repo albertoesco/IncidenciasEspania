@@ -1,21 +1,24 @@
+// Importaciones necesarias de React, React Native y Firebase
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { getFirestore, collection, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
-
 import appFirebase from '../firebase/credenciales';
 
+// Inicializar Firestore
 const db = getFirestore(appFirebase);
 
+// Componente principal para listar las incidencias
 export default function ListIncidencias({ route }) {
     const { nombreComunidad, nombreProvincia } = route.params;
-    const [incidencias, setIncidencias] = useState([]);
-    const { currentUser } = useAuth();
-    const [errorModalVisible, setErrorModalVisible] = useState(false);
-    const navigation = useNavigation();
+    const [incidencias, setIncidencias] = useState([]); // Estado para almacenar las incidencias
+    const { currentUser } = useAuth(); // Estado del usuario autenticado
+    const [errorModalVisible, setErrorModalVisible] = useState(false); // Estado para controlar la visibilidad del modal
+    const navigation = useNavigation(); // Hook para la navegación
 
+    // Efecto para obtener las incidencias de Firestore
     useEffect(() => {
         const getIncidencias = async () => {
             try {
@@ -37,10 +40,12 @@ export default function ListIncidencias({ route }) {
         getIncidencias();
     }, [nombreProvincia, nombreComunidad]);
 
+    // Función para manejar la presión de una incidencia
     const handleIncidenciaPress = (incidencia) => {
         navigation.navigate('Detail', { incidencia });
     };
 
+    // Función para manejar la creación de una nueva incidencia
     const handleNewIncidencia = () => {
         if (currentUser) {
             navigation.navigate('New', { nombreComunidad, nombreProvincia });
@@ -53,6 +58,7 @@ export default function ListIncidencias({ route }) {
         }
     };
 
+    // Función para manejar la eliminación de una incidencia
     const handleDeleteIncidencia = async (incidencia) => {
         try {
             await deleteDoc(incidencia.ref);
@@ -112,6 +118,7 @@ export default function ListIncidencias({ route }) {
     );
 }
 
+// Estilos para el componente
 const styles = StyleSheet.create({
     container: {
         flex: 1,
