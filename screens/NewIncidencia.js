@@ -3,11 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView,
 import { useNavigation } from '@react-navigation/native';
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
 import * as Animatable from 'react-native-animatable';
 
 const db = getFirestore(appFirebase);
+const storage = getStorage(appFirebase);
 
 export default function NewIncidencia({ route }) {
     const { nombreComunidad, nombreProvincia, uri, setIncidencias } = route.params;
@@ -23,6 +25,7 @@ export default function NewIncidencia({ route }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [modalFotoVisible, setModalFotoVisible] = useState(false);
 
+    
     const handleNewIncidencia = async () => {
         if (!nombre.trim() || !descripcion.trim() || !estado.trim()) {
             setError('Por favor ingrese todos los campos');
@@ -32,7 +35,7 @@ export default function NewIncidencia({ route }) {
             }, 3000);
             return;
         }
-
+    
         if (!uri.trim()) {
             setErrorFoto('Por favor seleccione una foto');
             setModalFotoVisible(true);
@@ -41,21 +44,33 @@ export default function NewIncidencia({ route }) {
             }, 3000);
             return;
         }
-
+    
         const fechaActual = new Date();
         const fechaFormateada = fechaActual.toISOString();
-
+    
         try {
+            // Subir imagen a Firebase Storage
+            const response = await fetch(uri);
+            const blob = await response.blob();
+            const storagePath = `comunidades/${nombreComunidad}/provincias/${nombreProvincia}/incidencias/${fechaFormateada}_${nombreComunidad}_${nombreProvincia}.jpg`;
+            const storageRef = ref(storage, storagePath);
+            await uploadBytes(storageRef, blob);
+    
+            // Obtener URL de descarga de la imagen
+            const downloadURL = await getDownloadURL(storageRef);
+    
+            // Crear documento de la incidencia en Firestore con la URL de la imagen
             await addDoc(collection(db, 'comunidades', nombreComunidad, 'provincias', nombreProvincia, 'incidencias'), {
                 nombre: nombre,
                 descripcion: descripcion,
                 estado: estado,
                 fecha: fechaFormateada,
-                uri: uri
+                uri: downloadURL  // Usar la URL de descarga
             });
+    
             navigation.goBack();
             if (setIncidencias) {
-                setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada, uri: uri }]);
+                setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada, uri: downloadURL }]);
             }
         } catch (e) {
             console.error('Error al crear incidencia:', e.message, e.stack);

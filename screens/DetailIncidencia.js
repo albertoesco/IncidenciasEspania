@@ -90,8 +90,8 @@ export default function DetailIncidencia({ route }) {
         )}
       </View>
       {incidencia.data.uri && (
-        <Image source={{ uri: incidencia.data.uri }} style={styles.image} /> 
-      )}
+    <Image source={{ uri: incidencia.data.uri }} style={styles.image} /> 
+)}
       <Modal
         animationType="slide"
         transparent={true}
