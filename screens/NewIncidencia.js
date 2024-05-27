@@ -4,6 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Picker } from '@react-native-picker/picker';
+import * as Animatable from 'react-native-animatable';
 
 const db = getFirestore(appFirebase);
 
@@ -13,7 +15,7 @@ export default function NewIncidencia({ route }) {
 
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
-    const [estado, setEstado] = useState('');
+    const [estado, setEstado] = useState('Pendiente');
     const [fotoSeleccionada, setFotoSeleccionada] = useState(uri);
     const [error, setError] = useState(null);
     const [errorFoto, setErrorFoto] = useState(null);
@@ -85,11 +87,17 @@ export default function NewIncidencia({ route }) {
                 </View>
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>Estado:</Text>
-                    <TextInput
-                        style={styles.input}
-                        value={estado}
-                        onChangeText={setEstado}
-                    />
+                    <Animatable.View animation="fadeIn" duration={500} style={styles.pickerContainer}>
+                    <Picker
+                        selectedValue={estado}
+                        onValueChange={(itemValue, itemIndex) => setEstado(itemValue)}
+                        style={styles.picker}
+                    >
+                        <Picker.Item label="Pendiente" value="Pendiente" />
+                        <Picker.Item label="En Proceso" value="En Proceso" />
+                        <Picker.Item label="Resuelto" value="Resuelto" />
+                    </Picker>
+                    </Animatable.View>
                 </View>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Galeria', { nombreComunidad, nombreProvincia })}>
@@ -222,5 +230,18 @@ const styles = StyleSheet.create({
         color: '#FF0000',
         textAlign: 'center',
         marginTop: 10,
+    },
+    pickerContainer: {
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        paddingHorizontal: 10,
+        marginBottom: 10,
+        backgroundColor: '#f9f9f9',
+        justifyContent: 'center',
+    },
+    picker: {
+        height: 40,
+        color: '#333',
     },
 });

@@ -73,7 +73,7 @@ export default function App() {
           <Stack.Screen 
             name="Detail" 
             component={DetailIncidencia} 
-            options={{ title: 'Detalle de la Incidencia' }} 
+            options={{ title: 'Detalle Incidencia' }} 
           />
           <Stack.Screen 
             name="New" 

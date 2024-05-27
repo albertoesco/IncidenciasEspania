@@ -1,9 +1,10 @@
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Modal, Image, Alert } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Modal, Image, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, updateDoc } from "firebase/firestore";
+import { Picker } from '@react-native-picker/picker';
 
 const db = getFirestore(appFirebase);
 
@@ -63,13 +64,17 @@ export default function DetailIncidencia({ route }) {
         <Text style={[styles.estadoText, styles.bold]}>Estado:</Text>
         {editing ? (
           <View style={styles.editContainer}>
-            <TextInput
-              style={styles.editInput}
-              value={newEstado}
-              onChangeText={(text) => setNewEstado(text)}
-              placeholder="Nuevo estado"
-              autoFocus
-            />
+            <Picker
+              selectedValue={newEstado}
+              style={styles.picker}
+              onValueChange={(itemValue, itemIndex) =>
+                setNewEstado(itemValue)
+              }>
+              <Picker.Item label="Pendiente" value="Pendiente" />
+              <Picker.Item label="En Proceso" value="En Proceso" />
+              <Picker.Item label="Resuelto" value="Resuelto" />
+              <Picker.Item label="Cancelado" value="Cancelado" />
+            </Picker>
             <TouchableOpacity style={styles.saveButton} onPress={handleSaveEstado}>
               <Text style={[styles.saveButtonText, styles.italic]}>Guardar</Text>
             </TouchableOpacity>
@@ -209,5 +214,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 3,
     borderColor: "#18315f",
+  },
+  picker: {
+    height: 50,
+    width: 150,
+    color: '#fff',
+    backgroundColor: '#18315f',
   },
 });
