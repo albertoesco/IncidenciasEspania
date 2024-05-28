@@ -71,6 +71,9 @@ export default function ListIncidencias({ route }) {
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Icon name="arrow-left" size={20} color="#18315f" />
+                </TouchableOpacity>
                 <Text style={styles.title}>Incidencias de {nombreProvincia}</Text>
                 <TouchableOpacity style={styles.addButton} onPress={handleNewIncidencia}>
                     <Icon name="plus" size={20} color="#fff" />
@@ -133,6 +136,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffffff',
         borderBottomWidth: 3,
         borderBottomColor: '#18315f',
+    },
+    backButton: {
+        alignItems: 'center',
+        padding: 10,
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 10,
     },
     title: {
         fontSize: 24,

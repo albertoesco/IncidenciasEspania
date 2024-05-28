@@ -6,6 +6,7 @@ import { auth } from '../firebase/credenciales';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from '../context/AuthContext';
 
 // Componente principal de Login
@@ -13,6 +14,7 @@ export default function Login() {
     // Estados para manejar email, contraseña, visibilidad del modal, mensaje del modal y tipo de modal
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [passwordVisible, setPasswordVisible] = useState(false); // Estado para manejar la visibilidad de la contraseña
     const [isModalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [modalType, setModalType] = useState(''); 
@@ -124,6 +126,9 @@ export default function Login() {
 
     return (
         <View style={styles.container}>
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={24} color="#18315f" />
+            </TouchableOpacity>
             <Text style={styles.title}>Bienvenido</Text>
             <Text style={styles.subtitle}>Inicio de Sesión / Registro</Text>
             <TextInput
@@ -132,13 +137,18 @@ export default function Login() {
                 value={email}
                 onChangeText={handleEmailChange}
             />
-            <TextInput
-                style={styles.input}
-                placeholder="Contraseña"
-                secureTextEntry
-                value={password}
-                onChangeText={handlePasswordChange}
-            />
+            <View style={styles.passwordContainer}>
+                <TextInput
+                    style={styles.inputPassword}
+                    placeholder="Contraseña"
+                    secureTextEntry={!passwordVisible}
+                    value={password}
+                    onChangeText={handlePasswordChange}
+                />
+                <TouchableOpacity style={styles.eyeIcon} onPress={() => setPasswordVisible(!passwordVisible)}>
+                    <Icon name={passwordVisible ? "visibility" : "visibility-off"} size={24} color="#18315f" />
+                </TouchableOpacity>
+            </View>
             <View style={styles.buttonContainer}>
                 <View style={styles.buttonGroup}>
                     <TouchableOpacity style={styles.button} onPress={handleSignInOrSignUp}>
@@ -171,6 +181,12 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#f0f0f0',
     },
+    backButton: {
+        position: 'absolute',
+        top: 40,
+        left: 20,
+        zIndex: 1, // Asegura que el botón esté sobre otros elementos
+    },
     title: {
         fontSize: 36,
         fontWeight: 'bold',
@@ -190,6 +206,23 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         marginBottom: 10,
         paddingHorizontal: 10,
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        marginBottom: 10,
+    },
+    inputPassword: {
+        flex: 1,
+        height: 40,
+        paddingHorizontal: 10,
+    },
+    eyeIcon: {
+        padding: 10,
     },
     buttonContainer: {
         flexDirection: 'row',

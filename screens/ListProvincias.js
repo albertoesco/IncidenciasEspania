@@ -66,8 +66,21 @@ export default function ListProvincias({ route }) {
         }
     };
 
+    // Función para manejar la presión del botón de retroceso
+    const handleBackPress = () => {
+        navigation.goBack();
+    };
+
     return (
         <View style={styles.container}>
+            <View style={styles.headerContainer}>
+                <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
+                    <Icon name="arrow-left" size={24} color="#18315f" />
+                </TouchableOpacity>
+                <View style={styles.headerSpacer} />
+                <Text style={styles.headerText}>Provincias de {nombreComunidad}</Text>
+                <View style={styles.headerSpacer} />
+            </View>
             <FlatList
                 data={provincias}
                 keyExtractor={(item) => item.id}
@@ -110,6 +123,27 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f0f0f0',
+    },
+    headerContainer: {
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 10,
+    },
+    backButton: {
+        position: 'absolute',
+        left: 20,
+        zIndex: 1,
+    },
+    headerSpacer: {
+        flex: 1,
+    },
+    headerText: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#18315f',
+        textAlign: 'center',
     },
     flatListContainer: {
         alignItems: 'center',

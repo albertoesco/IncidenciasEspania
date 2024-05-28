@@ -1,12 +1,14 @@
 // Importaciones necesarias de React, React Native y Firebase
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, Button, StyleSheet, TouchableOpacity } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 import { collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from '../firebase/credenciales';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from '@react-navigation/native';
 
 // Componente principal de Chat
 export default function Chat() {
@@ -15,6 +17,7 @@ export default function Chat() {
   const [user, setUser] = useState(null);
   const [username, setUsername] = useState('');
   const [isModalVisible, setModalVisible] = useState(false);
+  const navigation = useNavigation(); // Hook para la navegación
 
   // useEffect para la autenticación del usuario y suscripción a los mensajes
   useEffect(() => {
@@ -85,6 +88,9 @@ export default function Chat() {
   // Renderizar el componente de chat
   return (
     <View style={{ flex: 1 }}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={24} color="#18315f" />
+      </TouchableOpacity>
       <GiftedChat
         messages={messages}
         onSend={onSend}
@@ -101,8 +107,14 @@ export default function Chat() {
   );
 }
 
-// Estilos para el modal
+// Estilos para el modal y el botón de retroceso
 const styles = StyleSheet.create({
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+    zIndex: 1,
+  },
   modalContent: {
     backgroundColor: 'white',
     padding: 20,

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Modal } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Modal, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, collection, addDoc } from "firebase/firestore";
@@ -7,29 +7,41 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Picker } from '@react-native-picker/picker';
 import * as Animatable from 'react-native-animatable';
+import * as Location from 'expo-location';
+import MapView, { Marker } from 'react-native-maps';
 
 // Inicializar Firestore y Storage con las credenciales de Firebase
 const db = getFirestore(appFirebase);
 const storage = getStorage(appFirebase);
 
 export default function NewIncidencia({ route }) {
-    // Obtener parámetros de la ruta
     const { nombreComunidad, nombreProvincia, uri, setIncidencias } = route.params;
     const navigation = useNavigation();
 
-    // Definir estados para manejar el formulario y las interacciones del usuario
     const [nombre, setNombre] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [estado, setEstado] = useState('Pendiente');
     const [fotoSeleccionada, setFotoSeleccionada] = useState(uri);
     const [error, setError] = useState(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [ubicacion, setUbicacion] = useState(null);
+    const [mapVisible, setMapVisible] = useState(false);
 
-    // Función para manejar la creación de una nueva incidencia
+    const handleGetLocation = async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permiso denegado', 'La aplicación necesita permisos de ubicación para funcionar correctamente.');
+            return;
+        }
+
+        let location = await Location.getCurrentPositionAsync({});
+        setUbicacion(location.coords);
+        setMapVisible(true);
+    };
+
     const handleNewIncidencia = async () => {
-        // Validar que los campos del formulario no estén vacíos
-        if (!nombre.trim() || !descripcion.trim() || !estado.trim() || !uri.trim()) {
-            setError('Por favor ingrese todos los campos, incluyendo la foto');
+        if (!nombre.trim() || !descripcion.trim() || !estado.trim() || !uri.trim() || !ubicacion) {
+            setError('Por favor ingrese todos los campos, incluyendo la foto y la ubicación');
             setModalVisible(true);
             setTimeout(() => {
                 setModalVisible(false);
@@ -41,39 +53,47 @@ export default function NewIncidencia({ route }) {
         const fechaFormateada = fechaActual.toISOString();
 
         try {
-            // Subir imagen a Firebase Storage
             const response = await fetch(uri);
             const blob = await response.blob();
             const storagePath = `comunidades/${nombreComunidad}/provincias/${nombreProvincia}/incidencias/${fechaFormateada}_${nombreComunidad}_${nombreProvincia}.jpg`;
             const storageRef = ref(storage, storagePath);
             await uploadBytes(storageRef, blob);
 
-            // Obtener URL de descarga de la imagen
             const downloadURL = await getDownloadURL(storageRef);
 
-            // Crear documento de la incidencia en Firestore con la URL de la imagen
             await addDoc(collection(db, 'comunidades', nombreComunidad, 'provincias', nombreProvincia, 'incidencias'), {
                 nombre: nombre,
                 descripcion: descripcion,
                 estado: estado,
                 fecha: fechaFormateada,
-                uri: downloadURL  // Usar la URL de descarga
+                uri: downloadURL,
+                ubicacion
             });
 
-            // Navegar de regreso y actualizar la lista de incidencias si es necesario
             navigation.goBack();
             if (setIncidencias) {
-                setIncidencias(prevIncidencias => [...prevIncidencias, { nombre: nombre, descripcion: descripcion, estado: estado, fecha: fechaFormateada, uri: downloadURL }]);
+                setIncidencias(prevIncidencias => [...prevIncidencias, { nombre, descripcion, estado, fecha: fechaFormateada, uri: downloadURL, ubicacion }]);
             }
         } catch (e) {
             console.error('Error al crear incidencia:', e.message, e.stack);
         }
     };
 
+    const handleMapPress = (event) => {
+        setUbicacion(event.nativeEvent.coordinate);
+    };
+
+    const handleConfirmLocation = () => {
+        setMapVisible(false);
+    };
+
     return (
         <ScrollView contentContainerStyle={styles.scrollView}>
             <View style={styles.container}>
-                <View style={styles.titleContainer}>
+                <View style={styles.headerContainer}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Icon name="arrow-back" size={24} color="#18315f" />
+                    </TouchableOpacity>
                     <Text style={styles.title}>Nueva Incidencia en {nombreProvincia}</Text>
                 </View>
                 <View style={styles.inputContainer}>
@@ -96,15 +116,15 @@ export default function NewIncidencia({ route }) {
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>Estado:</Text>
                     <Animatable.View animation="fadeIn" duration={500} style={styles.pickerContainer}>
-                    <Picker
-                        selectedValue={estado}
-                        onValueChange={(itemValue, itemIndex) => setEstado(itemValue)}
-                        style={styles.picker}
-                    >
-                        <Picker.Item label="Pendiente" value="Pendiente" />
-                        <Picker.Item label="En Proceso" value="En Proceso" />
-                        <Picker.Item label="Resuelto" value="Resuelto" />
-                    </Picker>
+                        <Picker
+                            selectedValue={estado}
+                            onValueChange={(itemValue, itemIndex) => setEstado(itemValue)}
+                            style={styles.picker}
+                        >
+                            <Picker.Item label="Pendiente" value="Pendiente" />
+                            <Picker.Item label="En Proceso" value="En Proceso" />
+                            <Picker.Item label="Resuelto" value="Resuelto" />
+                        </Picker>
                     </Animatable.View>
                 </View>
                 <View style={styles.buttonContainer}>
@@ -121,6 +141,12 @@ export default function NewIncidencia({ route }) {
                         <Image source={{ uri: fotoSeleccionada }} style={styles.image} />
                     </View>
                 )}
+                {ubicacion && (
+                    <View style={styles.locationContainer}>
+                        <Text style={styles.label}>Ubicación Seleccionada:</Text>
+                        <Text>{`Lat: ${ubicacion.latitude}, Lon: ${ubicacion.longitude}`}</Text>
+                    </View>
+                )}
                 <Modal
                     animationType="slide"
                     transparent={true}
@@ -134,12 +160,41 @@ export default function NewIncidencia({ route }) {
                         </View>
                     </View>
                 </Modal>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={mapVisible}
+                    onRequestClose={() => setMapVisible(false)}
+                >
+                    <View style={styles.mapContainer}>
+                        <MapView
+                            style={styles.map}
+                            initialRegion={{
+                                latitude: ubicacion ? ubicacion.latitude : 37.78825,
+                                longitude: ubicacion ? ubicacion.longitude : -122.4324,
+                                latitudeDelta: 0.0922,
+                                longitudeDelta: 0.0421,
+                            }}
+                            onPress={handleMapPress}
+                        >
+                            {ubicacion && <Marker coordinate={ubicacion} />}
+                        </MapView>
+                        <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmLocation}>
+                            <Text style={styles.confirmButtonText}>Confirmar Ubicación</Text>
+                        </TouchableOpacity>
+                    </View>
+                </Modal>
+                <TouchableOpacity
+                    style={styles.locationButton}
+                    onPress={handleGetLocation}
+                >
+                    <Icon name="location-on" size={30} color="#fff" />
+                </TouchableOpacity>
             </View>
         </ScrollView>
     );
 }
 
-// Estilos para el componente
 const styles = StyleSheet.create({
     scrollView: {
         flexGrow: 1,
@@ -149,8 +204,9 @@ const styles = StyleSheet.create({
         padding: 20,
         backgroundColor: '#fff',
     },
-    titleContainer: {
-        width: '100%',
+    headerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginBottom: 20,
         borderBottomWidth: 3,
         borderBottomColor: '#18315f',
@@ -161,6 +217,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         color: '#18315f',
+        flex: 1,
     },
     inputContainer: {
         marginBottom: 20,
@@ -207,6 +264,10 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
         marginTop: 10,
     },
+    locationContainer: {
+        alignItems: 'center',
+        marginTop: 20,
+    },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -239,5 +300,38 @@ const styles = StyleSheet.create({
     picker: {
         height: 40,
         color: '#333',
+    },
+    mapContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    map: {
+        width: '100%',
+        height: '100%',
+    },
+    confirmButton: {
+        position: 'absolute',
+        bottom: 20,
+        left: 20,
+        backgroundColor: '#3F51B5',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+    },
+    confirmButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    locationButton: {
+        position: 'absolute',
+        bottom: 20,
+        left: 20,
+        backgroundColor: '#3F51B5',
+        borderRadius: 50,
+        padding: 10,
+        elevation: 5,
     },
 });

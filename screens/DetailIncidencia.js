@@ -1,21 +1,21 @@
-// Importaciones necesarias de React, React Native, Firebase y otros
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Modal, Image, Alert } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Modal, Image, Alert, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import appFirebase from "../firebase/credenciales";
 import { getFirestore, updateDoc } from "firebase/firestore";
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation } from '@react-navigation/native';
 
 // Obtener instancia de Firestore
 const db = getFirestore(appFirebase);
 
-// Componente principal que muestra el detalle de una incidencia
 export default function DetailIncidencia({ route }) {
   const { incidencia, nombreProvincia } = route.params; // Obtener los parámetros pasados a este componente
   const [editing, setEditing] = useState(false); // Estado para determinar si se está editando el estado
   const [newEstado, setNewEstado] = useState(incidencia.data.estado); // Estado para el nuevo estado de la incidencia
   const [modalVisible, setModalVisible] = useState(false); // Estado para controlar la visibilidad del modal
+  const navigation = useNavigation(); // Hook para la navegación
 
   // Función para activar el modo de edición del estado
   const handleEditEstado = () => {
@@ -50,10 +50,38 @@ export default function DetailIncidencia({ route }) {
     }
   };
 
+  // Función para obtener el estilo de fondo según el estado
+  const getEstadoStyle = (estado) => {
+    switch (estado) {
+      case 'Pendiente':
+        return styles.estadoPendiente;
+      case 'En Proceso':
+        return styles.estadoEnProceso;
+      case 'Resuelto':
+        return styles.estadoResuelto;
+      case 'Cancelado':
+        return styles.estadoCancelado;
+      default:
+        return styles.estadoDefault;
+    }
+  };
+
+  // Función para abrir la ubicación en una aplicación de mapas
+  const handleOpenMaps = () => {
+    const { latitude, longitude } = incidencia.data.ubicacion;
+    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    Linking.openURL(url);
+  };
+
   // Renderizar el componente de detalle de incidencia
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Detalle de Incidencia ({incidencia.data.nombre})</Text>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={24} color="#18315f" />
+      </TouchableOpacity>
+      <View style={styles.headerContainer}>
+        <Text style={styles.title}>Detalle de Incidencia ({incidencia.data.nombre})</Text>
+      </View>
       <View style={styles.item}>
         <Text style={styles.label}>Nombre:</Text>
         <Text style={[styles.value, styles.italic]}> {incidencia.data.nombre}</Text>
@@ -66,7 +94,7 @@ export default function DetailIncidencia({ route }) {
         <Text style={styles.label}>Fecha:</Text>
         <Text style={[styles.value, styles.italic]}> {incidencia.data.fecha}</Text>
       </View>
-      <View style={styles.estadoContainer}>
+      <View style={[styles.estadoContainer, getEstadoStyle(incidencia.data.estado)]}>
         <Text style={[styles.estadoText, styles.bold]}>Estado:</Text>
         {editing ? (
           <View style={styles.editContainer}>
@@ -87,7 +115,6 @@ export default function DetailIncidencia({ route }) {
           </View>
         ) : (
           <View style={styles.estadoValueContainer}>
-            <Ionicons name="checkmark-done" size={24} color="#fff" style={[styles.icon, styles.bold]} />
             <Text style={[styles.estadoValue, styles.italic]}>{incidencia.data.estado}</Text>
             <TouchableOpacity style={styles.editButton} onPress={handleEditEstado}>
               <Ionicons name="create-outline" size={24} color="#fff" />
@@ -97,6 +124,15 @@ export default function DetailIncidencia({ route }) {
       </View>
       {incidencia.data.uri && (
         <Image source={{ uri: incidencia.data.uri }} style={styles.image} /> 
+      )}
+      {incidencia.data.ubicacion && (
+        <View style={styles.locationContainer}>
+          <Text style={styles.label}>Ubicación:</Text>
+          <Text style={styles.value}>{`Lat: ${incidencia.data.ubicacion.latitude}, Lon: ${incidencia.data.ubicacion.longitude}`}</Text>
+          <TouchableOpacity style={styles.mapButton} onPress={handleOpenMaps}>
+            <Text style={styles.mapButtonText}>Ver en Mapa</Text>
+          </TouchableOpacity>
+        </View>
       )}
       <Modal
         animationType="slide"
@@ -124,12 +160,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 20,
   },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+    padding: 5,
+  },
+  headerContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
     textAlign: 'center',
     color: "#18315f",
+    marginTop: 5,
   },
   label: {
     fontSize: 18,
@@ -157,7 +203,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
     marginBottom: 20,
-    backgroundColor: '#18315f',
     padding: 10,
     borderRadius: 10,
     marginLeft: 25,
@@ -184,7 +229,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   saveButton: {
-    backgroundColor: "#18315f",
     padding: 10,
     borderRadius: 10,
   },
@@ -215,7 +259,36 @@ const styles = StyleSheet.create({
   picker: {
     height: 50,
     width: 150,
-    color: '#fff',
+    color: '#000',
+    backgroundColor: '#fff',
+  },
+  estadoPendiente: {
+    backgroundColor: '#FFA500',
+  },
+  estadoEnProceso: {
+    backgroundColor: '#1E90FF',
+  },
+  estadoResuelto: {
+    backgroundColor: '#32CD32',
+  },
+  estadoCancelado: {
+    backgroundColor: '#FF0000',
+  },
+  estadoDefault: {
     backgroundColor: '#18315f',
+  },
+  locationContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  mapButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: '#4a90e2',
+    borderRadius: 5,
+  },
+  mapButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
