@@ -170,8 +170,8 @@ export default function NewIncidencia({ route }) {
                         <MapView
                             style={styles.map}
                             initialRegion={{
-                                latitude: ubicacion ? ubicacion.latitude : 37.78825,
-                                longitude: ubicacion ? ubicacion.longitude : -122.4324,
+                                latitude: ubicacion ? ubicacion.latitude : 40.463667,
+                                longitude: ubicacion ? ubicacion.longitude : -3.74922,
                                 latitudeDelta: 0.0922,
                                 longitudeDelta: 0.0421,
                             }}
